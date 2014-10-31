@@ -19,6 +19,6 @@ int main(void)
     while(1)
     {
 		PINB |= _BV(PORTB5);	// Toggle PB5 by writing a one to the PIN register (14.2.2)
-		_delay_ms(50);			// Delay half a second
+		_delay_ms(500);			// Delay half a second
     }
 }
