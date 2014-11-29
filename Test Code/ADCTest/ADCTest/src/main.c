@@ -38,7 +38,7 @@ void InitADC(void)
 {
 	ADCSRA |= _BV(ADPS1) | _BV(ADPS2); // set ADC sample rate to - 125kHz @ 8Mhz (div 64 prescaler)
 	
-	ADMUX |= _BV(REFS0) | _BV(REFS1); //internal 1.1v voltage reference  
+	ADMUX |= _BV(REFS0); //Avcc (3.3v) voltage reference  
 	
 	ADMUX |= _BV(ADLAR); // Left adjust ADC
 	ADMUX |= _BV(MUX0); // a1 is input
