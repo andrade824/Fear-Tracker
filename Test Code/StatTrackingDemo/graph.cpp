@@ -19,7 +19,7 @@ void Graph::AddData(QByteArray & data)
 {
     for(int i = 0; i < data.size(); ++i)
     {
-        dataList[cur_item] = QPointF(cur_item, static_cast<unsigned char>(data.at(i)));
+        dataList[cur_item] = QPointF(cur_item, 255 - static_cast<unsigned char>(data.at(i)));
         if(++cur_item == MAX_ITEMS)
             cur_item = 0;
     }
@@ -28,7 +28,9 @@ void Graph::AddData(QByteArray & data)
 void Graph::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.setWindow(0, 0, MAX_ITEMS, 256);
+
+
+    painter.setWindow(0, 0, MAX_ITEMS, 255);
 
     painter.setRenderHint(QPainter::Antialiasing);
     painter.drawPolyline(dataList, MAX_ITEMS);

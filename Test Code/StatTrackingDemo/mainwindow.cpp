@@ -86,11 +86,11 @@ void MainWindow::ReadData()
 {
     QByteArray data = serial->readAll();
     qDebug() << "Data: " << QString(data);
-    ui->pteConsole->insertPlainText(QString(data));
+    /*ui->pteConsole->insertPlainText(QString(data));
 
     // Auto-scroll the text edit
     QScrollBar * sb = ui->pteConsole->verticalScrollBar();
-    sb->setValue(sb->maximum());
+    sb->setValue(sb->maximum());*/
 
     graph->AddData(data);
 }

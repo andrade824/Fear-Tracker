@@ -35,16 +35,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <widget class="QPlainTextEdit" name="pteConsole">
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -53,7 +43,7 @@
      <x>0</x>
      <y>0</y>
      <width>632</width>
-     <height>27</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
