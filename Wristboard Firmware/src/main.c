@@ -14,25 +14,37 @@
 #include <string.h>
 #include "uart.h"
 #include "timer.h"
+#include "accel.h"
+#include "i2c.h"
 
 int main(void)
 {
 	// Setup any needed hardware
 	SetupUART(UBRR);
 	SetupTimer();
+	SetupAccelerometer(FOURG, EIGHTBITS);
 	
 	// Enable global interrupts
 	sei();
 	
-	const char const * string = "Timed UART - 1ms\n\r";
-	int length = strlen(string);
+	// Test data
+	struct AccelData data;
 	
 	while(1)
 	{
 		if(ready_to_send)
 		{
-			for(int i = 0; i < length; i++)
-				UARTTransmit(string[i]);
+			// Grab the data
+			AccelGetData(&data);
+			
+			// Send the data
+			UARTTransmit(data.x);
+			UARTTransmit(data.y);
+			UARTTransmit(data.z);
+			
+			// Send some bytes so RealTerm can sync to it
+			UARTTransmit('A');
+			UARTTransmit('B');
 			
 			ready_to_send = false;
 		}

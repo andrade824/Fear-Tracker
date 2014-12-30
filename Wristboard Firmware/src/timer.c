@@ -31,6 +31,8 @@
 * Moral of the story: if you need a global variable to be written and read
 * from both interrupts and main code, you NEED to make it volatile so the
 * compiler doesn't screw you 10 ways from Sunday without your consent.
+*
+* - Devon
 */
 // Tells the main routine to retrieve and send out data
 volatile bool ready_to_send;

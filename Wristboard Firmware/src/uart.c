@@ -11,9 +11,9 @@
 *	Initializes the UART with the specified baud rate value. Must be called before calling
 *	other UART functions.
 *
-*	20.11 has descriptions of the registers used in this function.
+*	19.10 has descriptions of the registers used in this function.
 *
-*	@param ubrr The baud rate value to set the UART to (20.10 for a table of baud rate values)
+*	@param ubrr The baud rate value to set the UART to (19.11 for a table of baud rate values)
 *
 *	@return none
 */

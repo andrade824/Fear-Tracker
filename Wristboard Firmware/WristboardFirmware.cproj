@@ -111,13 +111,25 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="inc\accel.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="inc\config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="inc\i2c.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="inc\timer.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="inc\uart.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\accel.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\i2c.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\main.c">
