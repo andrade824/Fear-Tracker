@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QTimer>
 
 #include "feardatanode.h"
 
@@ -15,29 +16,32 @@ public:
     explicit FearData(QObject *parent = 0);
 
     // Returns the item at the specified index
-    Q_INVOKABLE FearDataNode * getDataNode(int index) const;
+    FearDataNode getDataNode(int index) const;
 
-    // Returns the item at the specified index
-    Q_INVOKABLE QVariantList getLatestData(int type, int num_data_nodes) const;
+    // Returns a list with the latest nodes
+    QList<FearDataNode> getLatestData(int num_data_nodes);
 
     // Returns the number of nodes currently being stored
-    Q_INVOKABLE int countDataNode() const;
+    int countDataNodes() const;
 
     // Adds a node to the data store
-    void AddData(FearDataNode * data);
-
-    Q_INVOKABLE void addGarbage();
+    void AddData(const FearDataNode & data);
 
     // Destructor
     ~FearData();
 
 signals:
+    // This signal is emitted every time new data is stored
+    void newDataStored(FearData *);
 
 public slots:
+    // Adds random garbage data for testing purposes
+    void addGarbage();
 
 private:
-    QList<FearDataNode *> m_data;   // A list of all data nodes
-    qint64 m_starttime;
+    QList<FearDataNode> m_data; // A list of all data nodes
+    qint64 m_starttime;         // When data started recording
+    QTimer * m_timer;           // A timer used to add garbage data
 };
 
 #endif // FEARDATA_H

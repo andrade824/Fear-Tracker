@@ -1,21 +1,31 @@
+#-------------------------------------------------
+#
+# Project created by QtCreator 2015-01-31T15:53:50
+#
+#-------------------------------------------------
+
+QT       += core gui opengl
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+TARGET = GraphicsViewDemo
 TEMPLATE = app
 
-QT += qml quick widgets
 
-SOURCES += main.cpp \
+SOURCES += main.cpp\
+        mainwindow.cpp \
     feardata.cpp \
-    feardatanode.cpp
+    feardatanode.cpp \
+    trigraph.cpp \
+    graphitem.cpp \
+    trigraphoverlay.cpp
 
-RESOURCES += qml.qrc
-
-# Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
-
-# Default rules for deployment.
-include(deployment.pri)
-
-DISTFILES +=
-
-HEADERS += \
+HEADERS  += mainwindow.h \
     feardata.h \
-    feardatanode.h
+    feardatanode.h \
+    feartype.h \
+    trigraph.h \
+    graphitem.h \
+    trigraphoverlay.h
+
+FORMS    += mainwindow.ui

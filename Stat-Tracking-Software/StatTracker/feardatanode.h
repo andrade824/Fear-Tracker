@@ -2,38 +2,21 @@
 #define FEARDATANODE_H
 
 #include <QObject>
+#include "feartype.h"
 
-class FearDataNode : public QObject
+class FearDataNode
 {
-    Q_OBJECT
-
-    // Properties exposed to QML (they're all read-only properties)
-    Q_PROPERTY(qint64 timeFromStart READ GetTimeFromStart)
-    Q_PROPERTY(bool jumpScare READ GetJumpScare)
-    Q_PROPERTY(unsigned short sweat READ GetSweat)
-    Q_PROPERTY(unsigned short heartRate READ GetHeartRate)
-    Q_PROPERTY(unsigned short fearLevel READ GetFearLevel)
-    Q_ENUMS(DataType)
-
-public:
-    enum DataType {
-        TYPE_HEART,
-        TYPE_JUMP,
-        TYPE_SWEAT,
-        TYPE_FEAR
-    };
-
 public:
     // Default Constructor
-    explicit FearDataNode(QObject * parent = 0);
+    explicit FearDataNode();
 
     // Constructor that defines every value
     explicit FearDataNode(qint64 starttime, bool jump,
                           unsigned short sweat, unsigned short heartrate,
-                          unsigned short fearlevel, QObject * parent = 0);
+                          unsigned short fearlevel);
 
     // Getters
-    QVariant GetData(int type);
+    unsigned short GetData(FearType type) const;
     qint64 GetTimeFromStart() const;
     bool GetJumpScare() const;
     unsigned short GetSweat() const;
