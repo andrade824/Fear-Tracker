@@ -11,7 +11,7 @@
 #include "../inc/config.h"
 #include <inttypes.h>	// gives us uint8_t, uint16_t, etc.
 
-#define BAUD 9600					// Desired baud rate
+#define BAUD 38400					// Desired baud rate
 #define UBRR F_CPU / 16/ BAUD - 1	// Calculated UBRR (baud rate value)
 
 // Initializes the UART with the specified baud rate value

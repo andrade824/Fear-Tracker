@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <string.h>
+#include <inttypes.h>
 #include "../inc/config.h"
 #include "../inc/UART.h"
 
@@ -19,6 +20,8 @@ int main(void)
 {
 	UARTInit(UBRR);
 	InitADC();
+	
+	uint8_t data; 
 
 	PORTB &= ~(_BV(PORTB5));	// Clear PB5, so it drives low by default (need to do this before switching it to an output)
 	DDRB |= _BV(PORTB5);		// Set PB5 as an output
@@ -27,9 +30,14 @@ int main(void)
    {	 
 	   while(ADCSRA & _BV(ADSC));	//wait for conversion to finish
 	   
-	   UARTTransmit(ADCH);
+	   data = ADCH;
+	  
 	   _delay_ms(10);
 	   ADCSRA |= _BV(ADSC);
+	   
+	   UARTTransmit(data);
+	   UARTTransmit('A');
+	   UARTTransmit('B');
    }
 	return 0;
 }
