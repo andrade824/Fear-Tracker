@@ -1,12 +1,11 @@
 /*
- * accel.c
+ * sensors.c
  *
- * Created: 12/27/2014 5:36:06 PM
- *  Author: Devon
+ * Created: 1/28/2015 7:09:24 PM
+ *  Author: Devon Andrade, Jerome Selig, Beatrix Tarjoto
  */ 
-
 #include "i2c.h"
-#include "accel.h"
+#include "sensors.h"
 
 // Whether we're in 8-bit or 12-bit data mode
 DataBits cur_bits = TWELVEBITS;
@@ -36,7 +35,7 @@ void SetupAccelerometer(GScale gscale, DataBits fread)
 	I2CSendByte(ACCEL_ID, XYZ_DATA_CFG, gscale & 0x3);
 	
 	// Initialize accelerometer to active mode and set/clear the F_READ bit
-	ctrlreg = I2CReadByte(ACCEL_ID, CTRL_REG1);
+	//ctrlreg = I2CReadByte(ACCEL_ID, CTRL_REG1);
 	I2CSendByte(ACCEL_ID, CTRL_REG1, ctrlreg | 0x01 | ((fread & 1) << 1));
 	
 	// Set which data
@@ -50,16 +49,16 @@ void SetupAccelerometer(GScale gscale, DataBits fread)
 *
 * @return	Through the data parameter
 */
-void AccelGetData(struct AccelData * data)
+void AccelGetData(struct SensorData * data)
 {
 	uint8_t raw_data[6] = {0};
-		
+	
 	// Grab the data from the accelerometer
 	if(cur_bits == TWELVEBITS)
 		I2CReadMultiple(ACCEL_ID, OUT_X_MSB, raw_data, 6);
 	else
 		I2CReadMultiple(ACCEL_ID, OUT_X_MSB, raw_data, 3);
-		
+	
 	// Compact and sign extend the data
 	for(int i = 0; i < 3 ; i++)
 	{
@@ -78,7 +77,66 @@ void AccelGetData(struct AccelData * data)
 		}
 	}
 
-	data->x = raw_data[0];
-	data->y = raw_data[1];
-	data->z = raw_data[2];
+	data->accel_x = raw_data[0];
+	data->accel_y = raw_data[1];
+	data->accel_z = raw_data[2];
+}
+
+/*
+* Configures the ADC settings that both the Pulse and GSR sensor share
+*
+* @param	void
+*
+* @return	void
+*/
+void InitADC(void)
+{
+	ADCSRA |= _BV(ADPS1) | _BV(ADPS2); // set ADC sample rate to - 125kHz @ 8Mhz (div 64 prescaler)
+	
+	ADMUX |= _BV(ADLAR); // Left adjust ADC
+	
+	DIDR0 |= _BV(ADC1D); //disabling digital input for pin A1
+	DIDR0 |= _BV(ADC2D); //disabling digital input for pin A2
+	
+	ADCSRA |= _BV(ADEN);//enable ADC
+	PRR &= ~(_BV(PRADC)); // Disable the power reduction ADC bit
+}
+
+/*
+* configures settings specifically for the pulse sensor and starts the 
+* conversion
+*
+* @param	void
+*
+* @return	void
+*/
+void SetupPulseSensor(void)
+{
+	ADMUX |= _BV(REFS0); //Avcc (3.3v) voltage reference
+	ADMUX &= ~(_BV(REFS1)); //Make sure to negate REFS1 or else it will be left high
+	
+	ADMUX &= 0b11110000; //clear the pin selection
+	ADMUX |= _BV(MUX0); // a1 is input
+	
+	ADCSRA |= _BV(ADSC); // start conversion, use this when ADC is in free running mode to start conversion
+	//otherwise it is triggered by something
+}
+
+/*
+* configures settings specifically for the GSR sensor and starts the
+* conversion
+*
+* @param	void
+*
+* @return	void
+*/
+void SetupGSR(void)
+{
+	//ADMUX |= _BV(REFS0) | _BV(REFS1); //Internal 1.1V voltage reference with external capacitor at AREF pin
+	
+	ADMUX &= 0b11110000; //clear the pin selection
+	ADMUX |= _BV(MUX1); // a2 is input
+	
+	ADCSRA |= _BV(ADSC); // start conversion, use this when ADC is in free running mode to start conversion
+	//otherwise it is triggered by something
 }

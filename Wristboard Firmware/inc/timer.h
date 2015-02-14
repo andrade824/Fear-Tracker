@@ -4,8 +4,6 @@
  * Created: 12/23/2014 8:05:11 PM
  * Author: Devon
  */ 
-
-
 #ifndef TIMER_H_
 #define TIMER_H_
 

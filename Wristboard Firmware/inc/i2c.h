@@ -4,8 +4,6 @@
  * Created: 12/24/2014 11:46:39 PM
  * Author: Devon
  */ 
-
-
 #ifndef I2C_H_
 #define I2C_H_
 
