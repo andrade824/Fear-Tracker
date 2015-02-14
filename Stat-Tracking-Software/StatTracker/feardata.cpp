@@ -12,8 +12,8 @@
 FearData::FearData(QObject *parent) : QObject(parent), m_starttime(QDateTime::currentMSecsSinceEpoch())
 {
     m_timer = new QTimer(this);
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(addGarbage()));
-    m_timer->start(50);
+    //connect(m_timer, SIGNAL(timeout()), this, SLOT(addGarbage()));
+    //m_timer->start(50);
 }
 
 /**
@@ -22,8 +22,9 @@ FearData::FearData(QObject *parent) : QObject(parent), m_starttime(QDateTime::cu
  * @param data  A pointer to a dynamically allocated
  *              FearDataNode to add to storage
  */
-void FearData::AddData(const FearDataNode & data)
+void FearData::AddData(FearDataNode data)
 {
+    data.SetTimeFromStart(m_starttime);
     m_data.append(data);
     emit newDataStored(this);
 }

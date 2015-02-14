@@ -10,7 +10,7 @@
  */
 FearDataNode::FearDataNode()
     : m_timeFromStart(QDateTime::currentMSecsSinceEpoch()), m_jumpScare(false), m_sweat(0),
-      m_heartRate(50), m_fearLevel(0)
+      m_heartRate(0), m_fearLevel(0)
 { }
 
 /**
@@ -24,11 +24,43 @@ FearDataNode::FearDataNode()
  * @param parent    The parent QObject of this object
  */
 FearDataNode::FearDataNode(qint64 starttime, bool jump,
-                           unsigned short sweat, unsigned short heartrate,
-                           unsigned short fearlevel)
+                           quint8 sweat, quint8 heartrate, quint8 fearlevel)
     : m_timeFromStart(QDateTime::currentMSecsSinceEpoch() - starttime), m_jumpScare(jump),
       m_sweat(sweat), m_heartRate(heartrate), m_fearLevel(fearlevel)
 { }
+
+/**
+ * @brief Copy constructor
+ *
+ * @param copy The other data node to copy
+ */
+FearDataNode::FearDataNode(const FearDataNode &copy)
+    : m_timeFromStart(QDateTime::currentMSecsSinceEpoch()), m_jumpScare(false), m_sweat(0),
+      m_heartRate(0), m_fearLevel(0)
+{
+    *this = copy;
+}
+
+/**
+ * @brief Assignment operator overload
+ *
+ * @param rhs The right hand side of the assignment
+ *
+ * @return A pointer to the current data node
+ */
+FearDataNode *FearDataNode::operator=(const FearDataNode &rhs)
+{
+    if(this != &rhs)
+    {
+        m_timeFromStart = rhs.m_timeFromStart;
+        m_jumpScare = rhs.m_jumpScare;
+        m_sweat = rhs.m_sweat;
+        m_heartRate = rhs.m_heartRate;
+        m_fearLevel = rhs.m_fearLevel;
+    }
+
+    return this;
+}
 
 /**
  * @brief Returns a piece of data based off of its type
@@ -37,9 +69,9 @@ FearDataNode::FearDataNode(qint64 starttime, bool jump,
  *
  * @return Returns a piece of data based off of its type
  */
-unsigned short FearDataNode::GetData(FearType type) const
+quint8 FearDataNode::GetData(FearType type) const
 {
-    unsigned short data;
+    quint8 data;
 
     switch(type)
     {
@@ -54,6 +86,24 @@ unsigned short FearDataNode::GetData(FearType type) const
 }
 
 /**
+ * @brief Setsa piece of data based off of its type
+ *
+ * @param type  Which piece of data to set
+ * @param data  The data to set
+ */
+void FearDataNode::SetData(FearType type, quint8 data)
+{
+    switch(type)
+    {
+        case TYPE_HEART: m_heartRate = data; break;
+        case TYPE_JUMP: m_jumpScare = data; break;
+        case TYPE_SWEAT: m_sweat = data; break;
+        case TYPE_FEAR: m_fearLevel = data; break;
+        default: break;
+    }
+}
+
+/**
  * Getters
  */
 qint64 FearDataNode::GetTimeFromStart() const
@@ -62,13 +112,13 @@ qint64 FearDataNode::GetTimeFromStart() const
 bool FearDataNode::GetJumpScare() const
 { return m_jumpScare; }
 
-unsigned short FearDataNode::GetSweat() const
+quint8 FearDataNode::GetSweat() const
 { return m_sweat; }
 
-unsigned short FearDataNode::GetHeartRate() const
+quint8 FearDataNode::GetHeartRate() const
 { return m_heartRate; }
 
-unsigned short FearDataNode::GetFearLevel() const
+quint8 FearDataNode::GetFearLevel() const
 { return m_fearLevel; }
 
 /**
@@ -80,13 +130,13 @@ void FearDataNode::SetTimeFromStart(qint64 starttime)
 void FearDataNode::SetJumpScare(bool jump)
 { m_jumpScare = jump; }
 
-void FearDataNode::SetSweat(unsigned short sweat)
+void FearDataNode::SetSweat(quint8 sweat)
 { m_sweat = sweat; }
 
-void FearDataNode::SetHeartRate(unsigned short rate)
+void FearDataNode::SetHeartRate(quint8 rate)
 { m_heartRate = rate; }
 
-void FearDataNode::SetFearLevel(unsigned short fear)
+void FearDataNode::SetFearLevel(quint8 fear)
 { m_fearLevel = fear; }
 
 /**

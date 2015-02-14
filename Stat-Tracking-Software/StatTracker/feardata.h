@@ -24,9 +24,6 @@ public:
     // Returns the number of nodes currently being stored
     int countDataNodes() const;
 
-    // Adds a node to the data store
-    void AddData(const FearDataNode & data);
-
     // Destructor
     ~FearData();
 
@@ -37,6 +34,9 @@ signals:
 public slots:
     // Adds random garbage data for testing purposes
     void addGarbage();
+
+    // Adds a node to the data store
+    void AddData(FearDataNode data);
 
 private:
     QList<FearDataNode> m_data; // A list of all data nodes

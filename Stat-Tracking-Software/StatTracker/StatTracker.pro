@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui opengl serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     feardatanode.cpp \
     trigraph.cpp \
     graphitem.cpp \
-    trigraphoverlay.cpp
+    trigraphoverlay.cpp \
+    dataretrieval.cpp
 
 HEADERS  += mainwindow.h \
     feardata.h \
@@ -26,6 +27,7 @@ HEADERS  += mainwindow.h \
     feartype.h \
     trigraph.h \
     graphitem.h \
-    trigraphoverlay.h
+    trigraphoverlay.h \
+    dataretrieval.h
 
 FORMS    += mainwindow.ui
