@@ -8,7 +8,7 @@
 #ifndef UART_H
 #define UART_H
 
-#include "config.h"
+#include "../inc/config.h"
 #include <inttypes.h>	// gives us uint8_t, uint16_t, etc.
 
 #define BAUD 38400					// Desired baud rate

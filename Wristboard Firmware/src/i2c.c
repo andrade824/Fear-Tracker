@@ -7,6 +7,7 @@
 
 #include <inttypes.h>
 #include <avr/io.h>
+#include "i2c.h"
 
 /**
 * Initialize the I2C hardware
