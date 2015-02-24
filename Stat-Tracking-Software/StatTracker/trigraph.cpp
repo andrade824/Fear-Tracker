@@ -8,7 +8,8 @@
  *
  * @param parent The widget that owns this one
  */
-TriGraph::TriGraph(QWidget * parent, int yLabelPadding) : QWidget(parent)
+TriGraph::TriGraph(QWidget * parent, int yLabelPadding, GraphingMode mode)
+    : QWidget(parent), m_mode(mode)
 {
     // Set up the scene
     m_heartItem = new GraphItem(TYPE_HEART, Qt::red);
@@ -20,7 +21,7 @@ TriGraph::TriGraph(QWidget * parent, int yLabelPadding) : QWidget(parent)
     m_scene->addItem(m_sweatItem);
     m_scene->addItem(m_jumpItem);
 
-    // Initialize the layout
+    // Initialize the layouts
     m_mainLayout = new QHBoxLayout;
     m_graphLayout = new QVBoxLayout;
 
@@ -66,8 +67,6 @@ TriGraph::TriGraph(QWidget * parent, int yLabelPadding) : QWidget(parent)
 
 /**
  * @brief Make sure every graphics view resizes when the window resizes
- *
- * @param Some event I don't use
  */
 void TriGraph::resizeEvent(QResizeEvent * event)
 {
@@ -79,27 +78,68 @@ void TriGraph::resizeEvent(QResizeEvent * event)
 }
 
 /**
+ * @brief Set the mode of the graphs
+ *
+ * @param mode The mode to switch to
+ */
+void TriGraph::setMode(TriGraph::GraphingMode mode)
+{
+    m_mode = mode;
+}
+
+/**
+ * @brief Sets the data storage used by the graphs
+ * @param data_store The storage to use
+ */
+void TriGraph::setDataStore(FearData * data_store)
+{
+    m_dataStore = data_store;
+}
+
+/**
  * @brief Updates each of the graphs with the new data
  *
  * @param data_store The data store to grab the latest data from
  */
-void TriGraph::displayLatestData(FearData * data_store)
+void TriGraph::getRealtimeData()
 {
-    m_data = data_store->getLatestData(150);
+    if(m_mode == MODE_REALTIME)
+    {
+        m_data = m_dataStore->getLatestData(150);
+        displayData();
+    }
+}
 
+/**
+ * @brief Get data between two points in time and display it
+ *
+ * @param beginTime The start time to get data
+ * @param endTime   The end time to get data
+ */
+void TriGraph::getAnalyzeData(quint64 beginTime, quint64 endTime)
+{
+    if(m_mode == MODE_ANAYLZE)
+    {
+        m_data = m_dataStore->getData(beginTime, endTime);
+        displayData();
+    }
+}
+
+/**
+ * @brief Update the graphs with the currently cached data
+ */
+void TriGraph::displayData()
+{
     m_heartItem->setData(&m_data);
     m_sweatItem->setData(&m_data);
     m_jumpItem->setData(&m_data);
-
-    int minX = m_data.front().GetTimeFromStart();
-    int maxX = m_data.back().GetTimeFromStart();
 
     // Make sure each graph is vertically apart from each other (no overlapping)
     m_heartItem->setPos(0, 0);
     m_sweatItem->setPos(0, 1000);
     m_jumpItem->setPos(0, 2000);
 
-    m_scene->setSceneRect(0, 0, maxX - minX, 2200);
+    m_scene->setSceneRect(0, 0, m_heartItem->getMaxX() - m_heartItem->getMinX(), 2500);
     m_heartGraph->fitInView(m_heartItem);
     m_sweatGraph->fitInView(m_sweatItem);
     m_jumpGraph->fitInView(m_jumpItem);

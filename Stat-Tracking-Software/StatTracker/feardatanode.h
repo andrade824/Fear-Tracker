@@ -22,7 +22,7 @@ public:
 
     // Getters
     quint8 GetData(FearType type) const;
-    qint64 GetTimeFromStart() const;
+    quint64 GetTimeFromStart() const;
     bool GetJumpScare() const;
     quint8 GetSweat() const;
     quint8 GetHeartRate() const;
@@ -44,7 +44,7 @@ signals:
 public slots:
 
 private:
-    qint64 m_timeFromStart; // Time in seconds from the start of grabbing data
+    quint64 m_timeFromStart; // Time in seconds from the start of grabbing data
     bool m_jumpScare;       // Whether there was a jump scare or not
     quint8 m_sweat;         // The victim's sweat level
     quint8 m_heartRate;     // The victim's heartrate

@@ -12,6 +12,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->triGraph->setDataStore(m_data);
+    ui->timeline->setDataStore(m_data);
+
     // Setup the serial ports combo box
     m_cmbSerialPort = new QComboBox(ui->statusBar);
     ui->statusBar->addPermanentWidget(m_cmbSerialPort);
@@ -25,7 +28,9 @@ MainWindow::MainWindow(QWidget *parent) :
     FillPortsInfo();
 
     // Connect everything up
-    connect(m_data, SIGNAL(newDataStored(FearData*)), ui->triGraph, SLOT(displayLatestData(FearData*)));
+    connect(ui->timeline, SIGNAL(markersMoved(quint64,quint64)), ui->triGraph, SLOT(getAnalyzeData(quint64,quint64)));
+    connect(m_data, SIGNAL(newDataStored(FearData*)), ui->triGraph, SLOT(getRealtimeData()));
+    connect(m_data, SIGNAL(newDataStored(FearData*)), ui->timeline, SLOT(displayLatestData()));
     connect(m_retrieval, SIGNAL(newDataRetrieved(FearDataNode)), m_data, SLOT(AddData(FearDataNode)));
     connect(m_btnConnect, SIGNAL(clicked()), this, SLOT(OpenSerialPort()));
 }

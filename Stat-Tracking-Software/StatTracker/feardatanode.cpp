@@ -106,7 +106,7 @@ void FearDataNode::SetData(FearType type, quint8 data)
 /**
  * Getters
  */
-qint64 FearDataNode::GetTimeFromStart() const
+quint64 FearDataNode::GetTimeFromStart() const
 { return m_timeFromStart; }
 
 bool FearDataNode::GetJumpScare() const

@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     trigraph.cpp \
     graphitem.cpp \
     trigraphoverlay.cpp \
-    dataretrieval.cpp
+    dataretrieval.cpp \
+    timeline.cpp \
+    utilities.cpp
 
 HEADERS  += mainwindow.h \
     feardata.h \
@@ -28,6 +30,8 @@ HEADERS  += mainwindow.h \
     trigraph.h \
     graphitem.h \
     trigraphoverlay.h \
-    dataretrieval.h
+    dataretrieval.h \
+    timeline.h \
+    utilities.h
 
 FORMS    += mainwindow.ui

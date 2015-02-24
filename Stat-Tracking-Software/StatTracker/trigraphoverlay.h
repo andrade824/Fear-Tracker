@@ -22,9 +22,6 @@ protected:
     void paintEvent(QPaintEvent *);
 
 private:
-    // Convert milliseconds from beginning of recording to text
-    QString milliToTime(qint64 milli) const;
-
     // Draws Y-labels for a graph
     void drawYLabels(QPainter * painter, GraphItem * graph, int yoffset);
 

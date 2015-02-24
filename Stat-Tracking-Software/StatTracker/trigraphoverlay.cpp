@@ -3,6 +3,7 @@
 #include <QFont>
 #include "trigraphoverlay.h"
 #include "graphitem.h"
+#include "utilities.h"
 
 /**
  * @brief Constructor that defines every value
@@ -44,7 +45,7 @@ void TriGraphOverlay::paintEvent(QPaintEvent *)
     // Draw X-axis lines and labels
     for(int i = m_xPixelsPerLabel; i + m_xoffset < width(); i += m_xPixelsPerLabel)
     {
-        QString timeText = milliToTime(m_heartGraph->mapToScene(i, 0).x() + m_heartItem->getMinX());
+        QString timeText = Utilities::milliToTime(m_heartGraph->mapToScene(i, 0).x() + m_heartItem->getMinX());
         painter.drawLine(i + m_xoffset, 0, i + m_xoffset, height());
         painter.drawText(i + m_xoffset + 3, thirdHeight - 5, timeText);
         painter.drawText(i + m_xoffset + 3, thirdHeight + thirdHeight - 5, timeText);
@@ -55,39 +56,6 @@ void TriGraphOverlay::paintEvent(QPaintEvent *)
     drawYLabels(&painter, m_heartItem, thirdHeight);
     drawYLabels(&painter, m_sweatItem, thirdHeight * 2);
     drawYLabels(&painter, m_jumpItem, thirdHeight * 3);
-}
-
-/**
- * @brief Converts the milliseconds from when data capture began
- *        to a string representation in the following format:
- *              hours:minutes:seconds
- *
- * @param milli Number of milliseconds from when data capture began
- *
- * @return String representation
- */
-QString TriGraphOverlay::milliToTime(qint64 milli) const
-{
-    int time = 0;
-    QString time_text;
-
-    // Hours
-    time = (milli / 1000 / 60 / 60) % 24;
-    time_text = ((time < 10) ? "0" : "") + QString::number(time);
-
-    // Minutes
-    time = (milli / 1000 / 60) % 60;
-    time_text += ((time < 10) ? ":0" : ":") + QString::number(time);
-
-    // Seconds
-    time = (milli / 1000) % 60;
-    time_text += ((time < 10) ? ":0" : ":") + QString::number(time);
-
-    // Milliseconds
-    time = milli % 1000;
-    time_text += ((time < 100) ? ((time < 10) ? ":00" : ":0") : ":") + QString::number(time);
-
-    return time_text;
 }
 
 /**

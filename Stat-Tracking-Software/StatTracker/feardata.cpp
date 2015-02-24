@@ -12,8 +12,8 @@
 FearData::FearData(QObject *parent) : QObject(parent), m_starttime(QDateTime::currentMSecsSinceEpoch())
 {
     m_timer = new QTimer(this);
-    //connect(m_timer, SIGNAL(timeout()), this, SLOT(addGarbage()));
-    //m_timer->start(50);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(addGarbage()));
+    m_timer->start(100);
 }
 
 /**
@@ -31,7 +31,7 @@ void FearData::AddData(FearDataNode data)
 
 void FearData::addGarbage()
 {
-    m_data.append(FearDataNode(m_starttime, rand() % 100, rand() % 100, rand() % 60 + 60, rand() % 47));
+    m_data.append(FearDataNode(m_starttime, rand() % 100, rand() % 100, rand() % 60 + 60, rand() % 100));
     emit newDataStored(this);
 }
 
@@ -54,7 +54,7 @@ FearDataNode FearData::getDataNode(int index) const
  * @param num_data_nodes    The number of data nodes to return
  * @return  Returns the latest data nodes
  */
-QList<FearDataNode> FearData::getLatestData(int num_data_nodes)
+QList<FearDataNode> FearData::getLatestData(int num_data_nodes) const
 {
     int total_num_nodes = m_data.count();   // Total number of nodes currently stored
 
@@ -63,6 +63,27 @@ QList<FearDataNode> FearData::getLatestData(int num_data_nodes)
         num_data_nodes = total_num_nodes;
 
     return m_data.mid(total_num_nodes - num_data_nodes);
+}
+
+/**
+ * @brief Returns every data node between the start and end times
+ *
+ * @param start Get every node after this time
+ * @param end   Get every node before this time
+ *
+ * @return A list of nodes between the start and end times
+ */
+QList<FearDataNode> FearData::getData(quint64 start, quint64 end) const
+{
+    QList<FearDataNode> data;
+
+    for(int i = 0; i < m_data.count(); ++i)
+    {
+        if(m_data[i].GetTimeFromStart() >= start && m_data[i].GetTimeFromStart() <= end)
+            data << m_data[i];
+    }
+
+    return data;
 }
 
 /**

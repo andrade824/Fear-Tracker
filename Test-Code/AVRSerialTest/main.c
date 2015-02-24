@@ -14,6 +14,7 @@
 #include <string.h>
 #include "uart.h"
 #include "timer.h"
+#include "sensors.h"
 
 int main(void)
 {
@@ -26,16 +27,32 @@ int main(void)
 	
 	srand(37);
 	
+	struct SensorData acceldata;
+	SetupAccelerometer(TWOG, EIGHTBITS);
+	InitADC();
+	SetupPulseSensor();
+	uint8_t heart = 0;
+	
 	while(1)
 	{
 		if(ready_to_send)
 		{	
+			AccelGetData(&acceldata);
+			
+			while(ADCSRA & _BV(ADSC));	//wait for conversion to finish USE RESULT
+			
+			heart = ADCH;	//save result of pulse sensor
+			
 			// Send the data
 			UARTTransmit(170);
 			UARTTransmit(0);
-			UARTTransmit(rand() % 60 + 60);
-			UARTTransmit(rand() % 30);
-			UARTTransmit(rand() % 100);
+			UARTTransmit(heart);
+			UARTTransmit(acceldata.accel_y + 128);
+			UARTTransmit(acceldata.accel_z + 128);
+			UARTTransmit('A');
+			UARTTransmit('B');
+			
+			ADCSRA |= _BV(ADSC); //Start real conversion
 			
 			ready_to_send = false;
 		}
