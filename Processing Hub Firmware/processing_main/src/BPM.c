@@ -5,78 +5,79 @@
  *      Author: B-Chan
  */
 
-#include "BPM.h"
+#include "..\inc\BPM.h"
+#include "..\inc\UART.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
-#include "driverlib/debug.h"
 #include "driverlib/fpu.h"
 #include "driverlib/gpio.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/rom.h"
 #include "driverlib/sysctl.h"
-#include "driverlib/uart.h"
+#include "driverlib/timer.h"
+
 
 volatile bool firstBeat = true;
 volatile bool secondBeat = false;
-volatile int signal = 0; // signal from wristboard adc
 volatile int hRate[10]; //sample of
 volatile int time;
-volatile int BPM = 0;
+
 volatile unsigned long sampleCounter = 0;          // used to determine pulse timing
 volatile unsigned long lastBeatTime = 0;           // used to find IBI
 volatile int P =512;                      // used to find peak in pulse wave, seeded
 volatile int T = 512;                     // used to find trough in pulse wave, seeded
 volatile int thresh = 525;                // used to find instant moment of heart beat, seeded
+volatile bool Pulse = false;     // true when pulse wave is high, false when it's low
+volatile bool QS = false;        // becomes true when Arduoino finds a beat.
+int amp = 0;
 
+volatile int signal = 0; // signal from wristboard adc
+volatile int BPM;
+volatile int IBI = 600;
 
+int GetBPM()
+{
+	return BPM;
+}
 void BPMTimerSetUp()
 {
-	//TIMER A
-	//One-Shot/Periodic Timer Mode
-	//The GPTM is configured for One-Shot and Periodic modes by the following sequence:
-	///1. Ensure the timer is disabled (the TnEN bit in the GPTMCTL register is cleared) before making
-	//any changes.
-	//
-    // Clear the timer interrupt.
-    //
+
+	 // Enable lazy stacking for interrupt handlers.
+	ROM_FPULazyStackingEnable();
+
+	//clear timer interrupt flag
     ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
-	   //
-    // Toggle the flag for the first timer.
+    // Configure the two 32-bit periodic timers.
     //
-    HWREGBITW(&g_ui32Flags, 0) ^= 1;
-	
-	//2. Write the GPTM Configuration Register (GPTMCFG) with a value of 0x0000.0000.
-	TIMER0_CFG_R  |= 0x00000000;
+    ROM_TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
+    ROM_TimerLoadSet(TIMER0_BASE, TIMER_A, ROM_SysCtlClockGet());
 
-	//3. Configure the TnMR field in the GPTM Timer n Mode Register (GPTMTnMR):
-	//a. Write a value of 0x1 for One-Shot mode.
-	//b. Write a value of 0x2 for Periodic mode.
-	TIMER0_TAMR_R   |= 0x2; //count down & periodic
-
-	/*4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in the GPTMTnMR register
-	to select whether to capture the value of the free-running timer at time-out, use an external
-	trigger to start counting, configure an additional trigger or interrupt, and count up or down.*/
-
-	/*5. Load the start value into the GPTM Timer n Interval Load Register (GPTMTnILR).
-	722 June 12, 2014*/
-	TIMER0_TAILR_R |= 0x20;
+    // Setup the interrupts for the timer timeouts.
+    ROM_IntEnable(INT_TIMER0A);
+    ROM_TimerEnable(TIMER0_BASE, TIMER_A);
 	
 	//
     // Enable the timers.
     //
-    ROM_TimerEnable(TIMER0_BASE, TIMER_A);
+
+    ROM_IntMasterEnable();
 }
 
 //A timeout event for Timer A of
 // GPTM 32/64-Bit Timer 1 is
 // triggered
-void
-Timer0IntHandler(void)
+void Timer0IntHandler(void)
 {
+	int i = 0;
+	signal = GetSig();
+
+    // Clear the timer interrupt.
+    ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+
 	sampleCounter += 2; // plus 2 ms
 		int N = sampleCounter - lastBeatTime;
 		bool Pulse = true;
@@ -91,7 +92,7 @@ Timer0IntHandler(void)
 			P = signal;
 
 		if(N > 250) // high frequency response filtering
-
+		{
 			if( (signal > thresh) && (Pulse == false) && (N > (IBI/5)*3 ) )
 			{
 
@@ -103,7 +104,7 @@ Timer0IntHandler(void)
 			if(secondBeat == true)
 			{
 				secondBeat = false;
-				for(int i = 0; i <10; i++)
+				for(i = 0; i <10; i++)
 				{
 					hRate[i] = IBI;
 				}
@@ -112,20 +113,20 @@ Timer0IntHandler(void)
 			if(firstBeat)
 			{
 				firstBeat = false;
-				secondBeat = true;s
+				secondBeat = true;
 				return;
 			}
 
 			int runningTotal = 0;
 
-			for(int i = 0; i <9; i++)
+			for( i = 0; i <9; i++)
 			{
 				hRate[i] = hRate[i+1];
-				runnin
+				runningTotal = runningTotal + hRate[i];
 			}
 
 			hRate[9] = IBI;
-			runningTotal  += rate[9];
+			runningTotal  += hRate[9];
 			runningTotal /= 10;
 			BPM = 60000/runningTotal;
 			//clear flag
@@ -133,7 +134,8 @@ Timer0IntHandler(void)
 		}
 
 
-		if (signal < thresh && Pulse == true){   // when the values are going down, the beat is over
+		if( (signal < thresh ) && (Pulse == true) )
+		{   // when the values are going down, the beat is over
 
 		   Pulse = false;                         // reset the Pulse flag so we can do it again
 		   amp = P - T;                           // get amplitude of the pulse wave
@@ -142,8 +144,9 @@ Timer0IntHandler(void)
 		   T = thresh;
 		 }
 
-		/*// 2.5 sec without heart beat
-		  //reset values */
+		 // 2.5 sec without heart beat
+		  //reset values
+
 
 		if( N > 2500)
 		{
@@ -154,5 +157,5 @@ Timer0IntHandler(void)
 			secondBeat - false;
 
 		}
-	return BPM;
+
 }
