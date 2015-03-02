@@ -45,7 +45,7 @@ int main(void)
 			while(ADCSRA & _BV(ADSC));	//wait for conversion to finish USE RESULT
 			
 			data.pulse_val = ADCH;	//save result of pulse sensor
-			_delay_ms(10);
+			_delay_us(9);
 			
 			SetupGSR();
 			while(ADCSRA & _BV(ADSC));	//wait for conversion to finish DISCARD RESULT
@@ -54,7 +54,7 @@ int main(void)
 			while(ADCSRA & _BV(ADSC));	//wait for conversion to finish USE RESULT
 			
 			data.gsr_val = ADCH;	//save result of GSR sensor
-			_delay_ms(10);
+			_delay_us(9);
 			
 			// Grab the accelerometer data
 			AccelGetData(&data);
