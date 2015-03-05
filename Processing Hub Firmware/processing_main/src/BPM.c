@@ -50,9 +50,10 @@ _Bool getFlag()
 {
   return flag;
 }
-void setFlag(_Bool f)
+void clearBPMFlag()
 {
-	flag = f;
+	flag = false;
+
 }
 void BPMTimerSetUp()
 {
@@ -91,10 +92,10 @@ void Timer0IntHandler(void)
 	ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
 	//isr triggers every 2 ms
-	int i = 0;
+	volatile int i = 0;
 	signal = sig[0];
 	sampleCounter += 2; // plus 2 ms
-	int N = sampleCounter - lastBeatTime;
+	volatile int N = sampleCounter - lastBeatTime;
 
 
 		if( (signal < thresh) && (N > (IBI/5)*3))
@@ -132,28 +133,28 @@ void Timer0IntHandler(void)
 				}
 
 
-			if(firstBeat == true)
-			{
-				firstBeat = false;
-				secondBeat = true;
-				ROM_IntMasterEnable();
-				return;
-			}
+				if(firstBeat == true)
+				{
+					firstBeat = false;
+					secondBeat = true;
+					ROM_IntMasterEnable();
+					return;
+				}
 
-			int runningTotal = 0;
+				volatile int runningTotal = 0;
 
-			for( i = 0; i <=8; i++)
-			{
-				hRate[i] = hRate[i+1];
-				runningTotal = runningTotal + hRate[i];
-			}
+				for( i = 0; i <=8; i++)
+				{
+					hRate[i] = hRate[i+1];
+					runningTotal = runningTotal + hRate[i];
+				}
 
-			hRate[9] = IBI;
-			runningTotal = runningTotal + hRate[9];
-			runningTotal = runningTotal / 10;
-			BPM = 60000/runningTotal;
-			//BPM = BPM / 3;
-			flag = true;
+				hRate[9] = IBI;
+				runningTotal = runningTotal + hRate[9];
+				runningTotal = runningTotal / 10;
+				BPM = 60000/runningTotal;
+				//BPM = BPM / 3;
+				flag = true;
 
 		}
 	}
@@ -178,7 +179,7 @@ void Timer0IntHandler(void)
 			P = 128;                               // set P default
 			T = 128;
 			firstBeat = true;
-			secondBeat - false;
+			secondBeat = false;
 			lastBeatTime = sampleCounter;
 
 		}

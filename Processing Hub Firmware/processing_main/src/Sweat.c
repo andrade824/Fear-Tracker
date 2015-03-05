@@ -20,7 +20,8 @@
 #include "driverlib/timer.h"
 
 volatile int threshold = 0;
-
+volatile int GSR_val = 0;
+volatile float GSRfloat = 0;
 void GSRinit()
 {
 
@@ -39,5 +40,6 @@ void GSRsetup()
 }
 void GSRProcessing()
 {
-
+	GSRfloat = (135 - sig[1])/(sig[1]);
+	GSR_val = GSRfloat*100;
 }

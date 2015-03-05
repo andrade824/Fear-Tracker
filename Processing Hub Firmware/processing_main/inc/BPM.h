@@ -13,7 +13,7 @@
 void BPMTimerSetUp();
 uint8_t GetBPM();
 bool getFlag();
-void setFlag(_Bool f);
+void clearBPMFlag();
 
 
 

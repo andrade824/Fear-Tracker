@@ -9,8 +9,10 @@ volatile uint8_t sig[7];
 void
 UARTIntHandler(void)
 {
+	ROM_IntMasterDisable();
+	int i = 0;
     uint32_t ui32Status;
-    volatile uint8_t temp[7];
+
     //
     // Get the interrrupt status.
     //
@@ -25,21 +27,20 @@ UARTIntHandler(void)
     // Loop while there are characters in the receive FIFO.
     //
 
-    int i = 0;
-    while( (temp[6] != 66) && (temp[5] != 65) )
+	/*for(i = 0; i<7 && ROM_UARTCharsAvail(UART1_BASE);i++)
+	{
+		i++
+		sig[i] = ROM_UARTCharGetNonBlocking(UART1_BASE);
+		//ROM_UARTCharPutNonBlocking(UART0_BASE, sig[i]);
+	}*/
+
+    while(ROM_UARTCharsAvail(UART1_BASE))
     {
-		for(i = 0; i<7 && ROM_UARTCharsAvail(UART1_BASE);i++)
-		{
-			temp[i] = ROM_UARTCharGetNonBlocking(UART1_BASE);
-			ROM_UARTCharPutNonBlocking(UART0_BASE, temp[0]);
-		}
-		if((temp[6] != 66) && (temp[5] != 65))
-		SysCtlDelay(1000);
+        sig[0] = ROM_UARTCharGetNonBlocking(UART1_BASE);
     }
+	ROM_UARTCharPutNonBlocking(UART0_BASE, sig[0]);
 
-
-    for(i = 0; i<7; i++)
-    	sig[i] = temp[i];
+	ROM_IntMasterEnable();
 }
 
 //*****************************************************************************
@@ -90,7 +91,6 @@ void UART1init(void)
     // Set GPIO B0 and A1 as UART pins.
     //
     GPIOPinConfigure(GPIO_PB0_U1RX);
-    GPIOPinConfigure(GPIO_PB1_U1TX);
     ROM_GPIOPinTypeUART(GPIO_PORTB_BASE, GPIO_PIN_0| GPIO_PIN_1);
     //
     // Configure the UART for 38400, 8-N-1 operation.
