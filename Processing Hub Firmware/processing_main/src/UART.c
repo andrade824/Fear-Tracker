@@ -1,6 +1,6 @@
 #include "..\inc\UART.h"
+volatile uint8_t sig[7];
 
-volatile uint8_t sig;
 //*****************************************************************************
 //
 // The UART interrupt handler.
@@ -10,8 +10,7 @@ void
 UARTIntHandler(void)
 {
     uint32_t ui32Status;
-
-
+    volatile uint8_t temp[7];
     //
     // Get the interrrupt status.
     //
@@ -25,30 +24,22 @@ UARTIntHandler(void)
     //
     // Loop while there are characters in the receive FIFO.
     //
-    while(ROM_UARTCharsAvail(UART1_BASE))
+
+    int i = 0;
+    while( (temp[6] != 66) && (temp[5] != 65) )
     {
-        //
-        // Read the next character from the UART and write it back to the UART.
-        //
-
-    	sig = ROM_UARTCharGetNonBlocking(UART1_BASE);
-
-        //
-        // Blink the LED to show a character transfer is occuring.
-        //
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2);
-
-        //
-        // Delay for 1 millisecond.  Each SysCtlDelay is about 3 clocks.
-        //
-        SysCtlDelay(SysCtlClockGet() / (1000 * 3));
-
-        //
-        // Turn off the LED
-        //
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0);
-
+		for(i = 0; i<7 && ROM_UARTCharsAvail(UART1_BASE);i++)
+		{
+			temp[i] = ROM_UARTCharGetNonBlocking(UART1_BASE);
+			ROM_UARTCharPutNonBlocking(UART0_BASE, temp[0]);
+		}
+		if((temp[6] != 66) && (temp[5] != 65))
+		SysCtlDelay(1000);
     }
+
+
+    for(i = 0; i<7; i++)
+    	sig[i] = temp[i];
 }
 
 //*****************************************************************************
@@ -57,7 +48,21 @@ UARTIntHandler(void)
 //
 //*****************************************************************************
 void
-UARTSend(const uint8_t *pui8Buffer, uint32_t ui32Count)
+UART0Send(const uint8_t *pui8Buffer, uint32_t ui32Count)
+{
+    //
+    // Loop while there are more characters to send.
+    //
+    while(ui32Count--)
+    {
+        //
+        // Write the next character to the UART.
+        //
+        ROM_UARTCharPutNonBlocking(UART0_BASE, *pui8Buffer++);
+    }
+}
+void
+UART1Send(const uint8_t *pui8Buffer, uint32_t ui32Count)
 {
     //
     // Loop while there are more characters to send.
@@ -71,77 +76,59 @@ UARTSend(const uint8_t *pui8Buffer, uint32_t ui32Count)
     }
 }
 
-//*****************************************************************************
-//
-// This example demonstrates how to send a string of data to the UART.
-//
-//*****************************************************************************
-void UARTinit(void)
+void UART1init(void)
 {
-    //
-    // Enable lazy stacking for interrupt handlers.  This allows floating-point
-    // instructions to be used within interrupt handlers, but at the expense of
-    // extra stack usage.
-    //
-    ROM_FPUEnable();
-    ROM_FPULazyStackingEnable();
 
-
-    //
-    // Enable the GPIO port that is used for the on-board LED.
-    //
-    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-
-    //
-    // Enable the GPIO pins for the LED (PF2).
-    //
-    ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
-
-    //
-    // Enable the peripherals used by this example.
     //
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART1);
+    SysCtlDelay(3);
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-
+    SysCtlDelay(3);
     //
     // Enable processor interrupts.
     //
-    ROM_IntMasterEnable();
-
-    //
-    // Set GPIO A0 and A1 as UART pins.
+    // Set GPIO B0 and A1 as UART pins.
     //
     GPIOPinConfigure(GPIO_PB0_U1RX);
     GPIOPinConfigure(GPIO_PB1_U1TX);
     ROM_GPIOPinTypeUART(GPIO_PORTB_BASE, GPIO_PIN_0| GPIO_PIN_1);
-
     //
-    // Configure the UART for 115,200, 8-N-1 operation.
+    // Configure the UART for 38400, 8-N-1 operation.
     //
     ROM_UARTConfigSetExpClk(UART1_BASE, ROM_SysCtlClockGet(), 38400,
                             (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                              UART_CONFIG_PAR_NONE));
-
     // Configure FIFO for 1/4th full
-    UARTFIFOLevelSet(UART1_BASE, UART_FIFO_TX2_8, UART_FIFO_RX2_8);
+    //UARTFIFOLevelSet(UART1_BASE, UART_FIFO_TX2_8, UART_FIFO_RX2_8);S
     //
-    // Enable the UART interrupt.
-    //
+
+    //UARTClockSourceSet(UART1_BASE, UART_CLOCK_PIOSC);
+
     ROM_IntEnable(INT_UART1);
-    ROM_UARTIntEnable(UART1_BASE, UART_INT_RX | UART_INT_RT);
+    ROM_UARTIntEnable(UART1_BASE, UART_INT_RX);
 
-    //
-    // Prompt for text to be entered.
-    //
-    UARTSend((uint8_t *)"\033[2JEnter text: ", 16);
+}
 
-    //
-    // Loop forever echoing data through the UART.
-    //
+void UART0init()
+{
+	//
+	// Enable the UART interrupt.
+	//
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0); //enable uart port
+	SysCtlDelay(3);
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA); //enable gipoA pins
+	SysCtlDelay(3);
+	GPIOPinConfigure(GPIO_PA1_U0TX); //set tx pin
+	ROM_GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_1);
+	ROM_UARTConfigSetExpClk(UART0_BASE, (ROM_SysCtlClockGet()), 115200,
+							  (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
+							   UART_CONFIG_PAR_NONE) );
 
+	  //UARTClockSourceSet(UART0_BASE, UART_CLOCK_PIOSC);
 }
 
 uint8_t GetSig()
 {
-	return sig;
+	return sig[0];
 }
+

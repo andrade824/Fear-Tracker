@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
+#include "inc/hw_types.h"
 #include "driverlib/fpu.h"
 #include "driverlib/gpio.h"
 #include "driverlib/interrupt.h"
@@ -20,51 +21,65 @@
 #include "driverlib/timer.h"
 
 
-volatile bool firstBeat = true;
-volatile bool secondBeat = false;
+volatile _Bool firstBeat = true;
+volatile _Bool secondBeat = false;
 volatile int hRate[10]; //sample of
 volatile int time;
 
 volatile unsigned long sampleCounter = 0;          // used to determine pulse timing
 volatile unsigned long lastBeatTime = 0;           // used to find IBI
-volatile int P =512;                      // used to find peak in pulse wave, seeded
-volatile int T = 512;                     // used to find trough in pulse wave, seeded
-volatile int thresh = 525;                // used to find instant moment of heart beat, seeded
-volatile bool Pulse = false;     // true when pulse wave is high, false when it's low
-volatile bool QS = false;        // becomes true when Arduoino finds a beat.
-int amp = 0;
+volatile int P = 128;                      // used to find peak in pulse wave, seeded
+volatile int T = 128;                     // used to find trough in pulse wave, seeded
+volatile int thresh = 128;                // used to find instant moment of heart beat, seeded
+volatile int Pulse = false;     // true when pulse wave is high, false when it's low
+volatile _Bool QS = false;        // becomes true when Arduoino finds a beat.
+int amp = 100;
 
 volatile int signal = 0; // signal from wristboard adc
-volatile int BPM;
+volatile uint8_t BPM;
 volatile int IBI = 600;
+volatile _Bool flag = false;
 
-int GetBPM()
+volatile uint8_t sig[7];
+
+uint8_t GetBPM()
 {
 	return BPM;
 }
+_Bool getFlag()
+{
+  return flag;
+}
+void setFlag(_Bool f)
+{
+	flag = f;
+}
 void BPMTimerSetUp()
 {
-
-	 // Enable lazy stacking for interrupt handlers.
-	ROM_FPULazyStackingEnable();
-
-	//clear timer interrupt flag
-    ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-
-    // Configure the two 32-bit periodic timers.
-    //
-    ROM_TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
-    ROM_TimerLoadSet(TIMER0_BASE, TIMER_A, ROM_SysCtlClockGet());
-
-    // Setup the interrupts for the timer timeouts.
-    ROM_IntEnable(INT_TIMER0A);
-    ROM_TimerEnable(TIMER0_BASE, TIMER_A);
-	
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0); // timer 0
+	SysCtlDelay(3);
+	 //
+	// Enable processor interrupts.
 	//
-    // Enable the timers.
-    //
 
-    ROM_IntMasterEnable();
+	//IntPrioritySet(INT_TIMER0A_TM4C123, 2);
+	//
+	// Configure the two 32-bit periodic timers.
+	//
+	ROM_TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
+	ROM_TimerLoadSet(TIMER0_BASE, TIMER_A, ROM_SysCtlClockGet()/500);
+	//ROM_SysCtlClockGet()/100000
+	//ROM_SysCtlClockGet()/500
+
+	// Setup the interrupts for the timer timeouts.
+    ROM_IntEnable(INT_TIMER0A);
+    ROM_TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+
+    //
+	// Enable the timers.
+	//
+	ROM_TimerEnable(TIMER0_BASE, TIMER_A);
+	
 }
 
 //A timeout event for Timer A of
@@ -72,25 +87,31 @@ void BPMTimerSetUp()
 // triggered
 void Timer0IntHandler(void)
 {
+	ROM_IntMasterDisable();
+	ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+
+	//isr triggers every 2 ms
 	int i = 0;
-	signal = GetSig();
-
-    // Clear the timer interrupt.
-    ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-
+	signal = sig[0];
 	sampleCounter += 2; // plus 2 ms
-		int N = sampleCounter - lastBeatTime;
-		bool Pulse = true;
+	int N = sampleCounter - lastBeatTime;
 
-		if( signal < (thresh && N) > (IBI/5)*3 )
+
+		if( (signal < thresh) && (N > (IBI/5)*3))
 		{
 			if(signal < T)
+			{
 				T = signal;
+			}
 		}
 
-		if(signal > thresh && signal > P)
+		if( (signal > thresh) && (signal > P) ) // thresh condition helps avoid noise
+		{
 			P = signal;
+		}
 
+
+		//look for heart beat here
 		if(N > 250) // high frequency response filtering
 		{
 			if( (signal > thresh) && (Pulse == false) && (N > (IBI/5)*3 ) )
@@ -100,46 +121,49 @@ void Timer0IntHandler(void)
 				IBI = sampleCounter - lastBeatTime;
 				lastBeatTime = sampleCounter;
 
-			}
-			if(secondBeat == true)
-			{
-				secondBeat = false;
-				for(i = 0; i <10; i++)
-				{
-					hRate[i] = IBI;
-				}
-			}
 
-			if(firstBeat)
+				if(secondBeat == true)
+				{
+					secondBeat = false;
+					for(i = 0; i <=9; i++)
+					{
+						hRate[i] = IBI;
+					}
+				}
+
+
+			if(firstBeat == true)
 			{
 				firstBeat = false;
 				secondBeat = true;
+				ROM_IntMasterEnable();
 				return;
 			}
 
 			int runningTotal = 0;
 
-			for( i = 0; i <9; i++)
+			for( i = 0; i <=8; i++)
 			{
 				hRate[i] = hRate[i+1];
 				runningTotal = runningTotal + hRate[i];
 			}
 
 			hRate[9] = IBI;
-			runningTotal  += hRate[9];
-			runningTotal /= 10;
+			runningTotal = runningTotal + hRate[9];
+			runningTotal = runningTotal / 10;
 			BPM = 60000/runningTotal;
-			//clear flag
+			//BPM = BPM / 3;
+			flag = true;
 
 		}
+	}
 
-
-		if( (signal < thresh ) && (Pulse == true) )
+		if( (signal < thresh)  && (Pulse == true) )
 		{   // when the values are going down, the beat is over
 
 		   Pulse = false;                         // reset the Pulse flag so we can do it again
 		   amp = P - T;                           // get amplitude of the pulse wave
-		   thresh = amp/2 + T;                    // set thresh at 50% of the amplitude
+		   thresh = (amp/2) + T;                    // set thresh at 50% of the amplitude
 		   P = thresh;                            // reset these for next time
 		   T = thresh;
 		 }
@@ -150,12 +174,14 @@ void Timer0IntHandler(void)
 
 		if( N > 2500)
 		{
-			thresh = 512;                          // set thresh default
-			P = 512;                               // set P default
-			T = 512;
+			thresh = 128;                          // set thresh default
+			P = 128;                               // set P default
+			T = 128;
 			firstBeat = true;
 			secondBeat - false;
+			lastBeatTime = sampleCounter;
 
 		}
 
+	ROM_IntMasterEnable();
 }

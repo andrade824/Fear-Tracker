@@ -17,7 +17,6 @@ bool jump = false;
 
 void Jump
 {
-
 	jump = false;
 
 	AccelData currAccel; // from
@@ -56,7 +55,6 @@ void Jump
     	jump = true;
 
 }
-
 
 
 #endif /* FEAR_H_ */

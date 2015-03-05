@@ -53,9 +53,14 @@ __error__(char *pcFilename, uint32_t ui32Line)
 #endif
 
 
-void UARTinit(void);
-void UARTSend(const uint8_t *pui8Buffer, uint32_t ui32Count);
+void UART1init(void);
+void UART0init(void);
+
+void UART0Send(const uint8_t *pui8Buffer, uint32_t ui32Count);
+void UART1Send(const uint8_t *pui8Buffer, uint32_t ui32Count);
 void UARTIntHandler(void);
 uint8_t GetSig();
+
+extern volatile uint8_t sig[7];
 
 #endif

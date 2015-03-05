@@ -9,7 +9,10 @@
 #define SWEAT_H_
 
 
+void GSRinit();
+void GSRsetup();
+void GSRProcessing();
 
-
+extern volatile int GSRval;
 
 #endif /* SWEAT_H_ */
