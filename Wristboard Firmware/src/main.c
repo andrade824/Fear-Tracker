@@ -59,6 +59,9 @@ int main(void)
 			// Grab the accelerometer data
 			AccelGetData(&data);
 			
+			// Send some bytes so RealTerm can sync to it
+			UARTTransmit(0xAA);
+			UARTTransmit(24);
 			// Send the data
 			UARTTransmit(data.pulse_val);
 			UARTTransmit(data.gsr_val);
@@ -66,9 +69,9 @@ int main(void)
 			UARTTransmit(data.accel_y);
 			UARTTransmit(data.accel_z);
 			
-			// Send some bytes so RealTerm can sync to it
-			UARTTransmit('A');
-			UARTTransmit('B');
+			UARTTransmit(0); 
+			UARTTransmit(0); //to fill the UART receive fifo buffer in the tiva board for interrupt 
+			
 			
 			ready_to_send = false;
 		}

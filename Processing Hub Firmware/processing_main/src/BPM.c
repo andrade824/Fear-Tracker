@@ -20,7 +20,7 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
 
-#define SAMPLESIZE  10
+#define SAMPLESIZE  20
 
 volatile _Bool firstBeat = true;
 volatile _Bool secondBeat = false;
@@ -41,8 +41,7 @@ volatile uint8_t BPM;
 volatile int IBI = 600;
 volatile _Bool flag = false;
 
-volatile uint8_t sig[5];
-
+extern volatile uint8_t pulse_data;
 
 uint8_t GetBPM()
 {
@@ -95,7 +94,7 @@ void Timer0IntHandler(void)
 
 	//isr triggers every 2 ms
 	volatile int i = 0;
-	signal = sig[4];
+	signal = pulse_data;
 	sampleCounter += 2; // plus 2 ms
 	volatile int N = sampleCounter - lastBeatTime;
 

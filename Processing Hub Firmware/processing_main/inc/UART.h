@@ -62,4 +62,9 @@ void UARTIntHandler(void);
 uint8_t GetSig();
 
 extern volatile uint8_t sig[5];
+extern volatile uint8_t pulse_data;
+extern volatile uint8_t gsr_data;
+extern volatile uint8_t x_data;
+extern volatile uint8_t y_data;
+extern volatile uint8_t z_data;
 #endif

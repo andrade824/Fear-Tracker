@@ -11,49 +11,54 @@
 #include <stdbool.h>
 
 #define SAMPLE 10
- volatile uint8_t x_data[SAMPLE];
- volatile uint8_t y_data[SAMPLE];
- volatile uint8_t z_data[SAMPLE];
+ volatile uint8_t x_datara[SAMPLE];
+ volatile uint8_t y_datara[SAMPLE];
+ volatile uint8_t z_datara[SAMPLE];
 
+volatile uint8_t x_data;
+volatile uint8_t y_data;
+volatile uint8_t z_data;
  volatile uint8_t sig[5];
 int Displacement()
 {
-	int avg = 0;
-	int xavg = 0;
-	int yavg = 0;
-	int zavg = 0;
-	sig[0] += 100;
-	sig[1] += 100;
-	sig[2] += 100;
+	int32_t xavg = x_data;
+	int32_t yavg = y_data;
+	int32_t zavg = z_data;
 
-	int i = 0;
-	for (i = 0; i <= (SAMPLE - 2); i++)
-	{
+	uint32_t avg = 0;
 
-		x_data[i] += x_data[i+1];
-		y_data[i] += x_data[i+1];
-		z_data[i] += x_data[i+1];
-	}
+	if(xavg > 126)
+		xavg += 127;
+	if(yavg > 126)
+		xavg += 127;
+	if(zavg > 126)
+		xavg += 127;
 
-	x_data[SAMPLE-1] = sig[0];
-	y_data[SAMPLE-1] = sig[1];
-	z_data[SAMPLE-1] = sig[2];
-
-	for(i = 0; i < SAMPLE; i++)
-	{
-		xavg += x_data[i];
-		yavg += y_data[i];
-		zavg += z_data[i];
-	}
-
-	xavg /= SAMPLE;
-	yavg /= SAMPLE;
-	zavg /= SAMPLE;
+	xavg = xavg * xavg;
+	yavg = yavg * yavg;
+	zavg = zavg * zavg;
 
 	avg = xavg + yavg + zavg;
-
-	avg = avg/3;
+	sqrt(avg);
 
 	return avg;
 }
 
+int32_t sqrt(int32_t n)
+{
+	int32_t root = 0, bit, trial;
+		bit = (n >= 0x10000) ? 1<<30 : 1<<14;
+	do
+	{
+		trial = root+bit;
+		if (n >= trial)
+		{
+			n -= trial;
+			root = trial+bit;
+		}
+		root >>= 1;
+		bit >>= 2;
+	} while (bit);
+
+	return root;
+}

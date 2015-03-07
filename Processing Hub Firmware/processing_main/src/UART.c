@@ -1,6 +1,10 @@
 #include "..\inc\UART.h"
 volatile uint8_t sig[5];
-
+extern volatile uint8_t pulse_data;
+extern volatile uint8_t gsr_data;
+extern volatile uint8_t x_data;
+extern volatile uint8_t y_data;
+extern volatile uint8_t z_data;
 //*****************************************************************************
 //
 // The UART interrupt handler.
@@ -10,8 +14,8 @@ void
 UARTIntHandler(void)
 {
 	ROM_IntMasterDisable();
-	int i = 0;
-	char temp;
+	volatile char temp=0;
+	volatile int i = 0;
     uint32_t ui32Status;
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2);
     //
@@ -28,39 +32,50 @@ UARTIntHandler(void)
     // Loop while there are characters in the receive FIFO.
     //
 
+    if(ROM_UARTCharsAvail(UART1_BASE))
+    {
 		if( ROM_UARTCharGetNonBlocking(UART1_BASE) == 0xAA )
 		{
 			if( ROM_UARTCharGetNonBlocking(UART1_BASE) == 24 )
 			{
+				pulse_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				gsr_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				x_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				y_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				z_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
 
-				for(i = 0; i<5 && ROM_UARTCharsAvail(UART1_BASE);i++)
-				{
-					sig[i] = ROM_UARTCharGetNonBlocking(UART1_BASE);
-					//ROM_UARTCharPutNonBlocking(UART0_BASE, sig[i]);
-				}
+				while(ROM_UARTCharsAvail(UART1_BASE))
+				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
+
 			}
 
 			else
 			{
-				while(ROM_UARTCharsAvail(UART1_BASE))
+				 while(ROM_UARTCharsAvail(UART1_BASE))
 					temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
 			}
 		}
 		else
 		{
 			while(ROM_UARTCharsAvail(UART1_BASE))
-			temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
 		}
 
-/*
+    }
+    /*
     while(ROM_UARTCharsAvail(UART1_BASE))
     {
         sig[0] = ROM_UARTCharGetNonBlocking(UART1_BASE);
     }
 	//ROM_UARTCharPutNonBlocking(UART0_BASE, sig[0]);
 
-*/
+	for(i = 0; i<5 && ROM_UARTCharsAvail(UART1_BASE);i++)
+		{
+			sig[i] = ROM_UARTCharGetNonBlocking(UART1_BASE);
+			//ROM_UARTCharPutNonBlocking(UART0_BASE, sig[i]);
+		}
 
+*/
 
 
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0);
@@ -139,7 +154,7 @@ void UART1init(void)
     //UARTClockSourceSet(UART1_BASE, UART_CLOCK_PIOSC);
 
     ROM_IntEnable(INT_UART1);
-    ROM_UARTIntEnable(UART1_BASE, UART_INT_RX);
+    ROM_UARTIntEnable(UART1_BASE, UART_INT_RX | UART_INT_OE);
 
 }
 
