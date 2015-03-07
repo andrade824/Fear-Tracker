@@ -1,5 +1,5 @@
 #include "..\inc\UART.h"
-volatile uint8_t sig[7];
+volatile uint8_t sig[5];
 
 //*****************************************************************************
 //
@@ -11,8 +11,9 @@ UARTIntHandler(void)
 {
 	ROM_IntMasterDisable();
 	int i = 0;
+	char temp;
     uint32_t ui32Status;
-
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2);
     //
     // Get the interrrupt status.
     //
@@ -27,19 +28,42 @@ UARTIntHandler(void)
     // Loop while there are characters in the receive FIFO.
     //
 
-	/*for(i = 0; i<7 && ROM_UARTCharsAvail(UART1_BASE);i++)
-	{
-		i++
-		sig[i] = ROM_UARTCharGetNonBlocking(UART1_BASE);
-		//ROM_UARTCharPutNonBlocking(UART0_BASE, sig[i]);
-	}*/
+		if( ROM_UARTCharGetNonBlocking(UART1_BASE) == 0xAA )
+		{
+			if( ROM_UARTCharGetNonBlocking(UART1_BASE) == 24 )
+			{
 
+				for(i = 0; i<5 && ROM_UARTCharsAvail(UART1_BASE);i++)
+				{
+					sig[i] = ROM_UARTCharGetNonBlocking(UART1_BASE);
+					//ROM_UARTCharPutNonBlocking(UART0_BASE, sig[i]);
+				}
+			}
+
+			else
+			{
+				while(ROM_UARTCharsAvail(UART1_BASE))
+					temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
+			}
+		}
+		else
+		{
+			while(ROM_UARTCharsAvail(UART1_BASE))
+			temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
+		}
+
+/*
     while(ROM_UARTCharsAvail(UART1_BASE))
     {
         sig[0] = ROM_UARTCharGetNonBlocking(UART1_BASE);
     }
-	ROM_UARTCharPutNonBlocking(UART0_BASE, sig[0]);
+	//ROM_UARTCharPutNonBlocking(UART0_BASE, sig[0]);
 
+*/
+
+
+
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0);
 	ROM_IntMasterEnable();
 }
 
@@ -80,6 +104,16 @@ UART1Send(const uint8_t *pui8Buffer, uint32_t ui32Count)
 void UART1init(void)
 {
 
+	//
+	// Enable the GPIO port that is used for the on-board LED.
+	//
+	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+
+	//
+	// Enable the GPIO pins for the LED (PF2).
+	//
+	ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
+
     //
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART1);
     SysCtlDelay(3);
@@ -98,9 +132,9 @@ void UART1init(void)
     ROM_UARTConfigSetExpClk(UART1_BASE, ROM_SysCtlClockGet(), 38400,
                             (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                              UART_CONFIG_PAR_NONE));
-    // Configure FIFO for 1/4th full
-    //UARTFIFOLevelSet(UART1_BASE, UART_FIFO_TX2_8, UART_FIFO_RX2_8);S
-    //
+    // Configure FIFO for 1/2th receive full
+    UARTFIFOLevelSet(UART1_BASE, UART_FIFO_TX4_8,UART_FIFO_RX4_8);
+
 
     //UARTClockSourceSet(UART1_BASE, UART_CLOCK_PIOSC);
 

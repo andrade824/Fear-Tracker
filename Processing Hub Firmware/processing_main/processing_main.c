@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "inc\BPM.h"
 #include "inc\UART.h"
+#include "inc\Accel.h"
 #include "inc\Timer.h"
 #include "inc/hw_types.h"
 #include "driverlib/timer.h"
@@ -31,9 +32,8 @@ volatile _Bool send_flag;
 	//ROM_SysCtlClockSet(SYSCTL_SYSDIV_1 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN |
 	  //               SYSCTL_XTAL_16MHZ);
 
-
-    // BPMTimerSetUp();
-    // Timer1init();
+     BPMTimerSetUp();
+     Timer1init();
 	 UART0init();
 	 UART1init();
 
@@ -43,17 +43,18 @@ volatile _Bool send_flag;
 
 	 while(1)
 	 {
+		clearBPMFlag();
+		if(send_flag)
+		{
 
-		//if(send_flag)
-//		{
+			ROM_UARTCharPut( UART0_BASE,0xAA);
+			ROM_UARTCharPut( UART0_BASE, Displacement() );
+		 	uint8_t hoopla = GetBPM();
+		 	ROM_UARTCharPut( UART0_BASE, hoopla );
+		 	ROM_UARTCharPut( UART0_BASE, sig[3] );
+		 	ROM_UARTCharPut( UART0_BASE, 25 );
+			send_flag = false;
 
-		 	//uint8_t hoopla = GetBPM();
-		 	//ROM_UARTCharPut( UART0_BASE, hoopla );
-			//ROM_UARTCharPut( UART0_BASE, 'A' );
-			//ROM_UARTCharPut( UART0_BASE, 'B' );
-			//setFlag(false);
-			//send_flag = false;
-
-	//	}
+		}
 	 }
 }

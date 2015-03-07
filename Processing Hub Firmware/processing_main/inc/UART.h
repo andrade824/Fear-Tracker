@@ -61,8 +61,5 @@ void UART1Send(const uint8_t *pui8Buffer, uint32_t ui32Count);
 void UARTIntHandler(void);
 uint8_t GetSig();
 
-extern volatile uint8_t sig[7];
-extern volatile uint8_t x_data;
-extern volatile uint8_t y_data;
-extern volatile uint8_t z_data;
+extern volatile uint8_t sig[5];
 #endif

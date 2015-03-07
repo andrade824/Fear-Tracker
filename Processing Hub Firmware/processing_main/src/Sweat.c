@@ -35,7 +35,8 @@ void GSRsetup()
 		sum += sig[1];
 	}
 
-	threshold = sum/500;
+	threshold = sum/500; // avg skin resistance
+	//for a hig pass filter
 
 }
 void GSRProcessing()

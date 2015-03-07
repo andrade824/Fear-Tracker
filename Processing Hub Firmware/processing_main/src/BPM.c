@@ -20,10 +20,11 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
 
+#define SAMPLESIZE  10
 
 volatile _Bool firstBeat = true;
 volatile _Bool secondBeat = false;
-volatile int hRate[10]; //sample of
+volatile int hRate[SAMPLESIZE]; //sample of
 volatile int time;
 
 volatile unsigned long sampleCounter = 0;          // used to determine pulse timing
@@ -40,7 +41,8 @@ volatile uint8_t BPM;
 volatile int IBI = 600;
 volatile _Bool flag = false;
 
-volatile uint8_t sig[7];
+volatile uint8_t sig[5];
+
 
 uint8_t GetBPM()
 {
@@ -93,7 +95,7 @@ void Timer0IntHandler(void)
 
 	//isr triggers every 2 ms
 	volatile int i = 0;
-	signal = sig[0];
+	signal = sig[4];
 	sampleCounter += 2; // plus 2 ms
 	volatile int N = sampleCounter - lastBeatTime;
 
@@ -126,7 +128,7 @@ void Timer0IntHandler(void)
 				if(secondBeat == true)
 				{
 					secondBeat = false;
-					for(i = 0; i <=9; i++)
+					for(i = 0; i <=( SAMPLESIZE - 1); i++)
 					{
 						hRate[i] = IBI;
 					}
@@ -143,15 +145,15 @@ void Timer0IntHandler(void)
 
 				volatile int runningTotal = 0;
 
-				for( i = 0; i <=8; i++)
+				for( i = 0; i <=( SAMPLESIZE - 2); i++)
 				{
 					hRate[i] = hRate[i+1];
 					runningTotal = runningTotal + hRate[i];
 				}
 
-				hRate[9] = IBI;
-				runningTotal = runningTotal + hRate[9];
-				runningTotal = runningTotal / 10;
+				hRate[SAMPLESIZE - 1] = IBI;
+				runningTotal = runningTotal + hRate[SAMPLESIZE - 1];
+				runningTotal = runningTotal / SAMPLESIZE;
 				BPM = 60000/runningTotal;
 				//BPM = BPM / 3;
 				flag = true;
