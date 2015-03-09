@@ -17,6 +17,13 @@ public:
     // Destructor
     ~TriGraphOverlay();
 
+public slots:
+    // Display the hover marker over the provided node
+    void displayHoverMarker(FearDataNode node);
+
+    // Disable the hover marker
+    void disableHoverMarker();
+
 protected:
     // Paint event that draws the labels
     void paintEvent(QPaintEvent *);
@@ -28,6 +35,8 @@ private:
 private:
     int m_xoffset;  // How far from the left side of the trigraph to start drawing the graphs
     int m_xPixelsPerLabel;  // How many pixels each x-label should be separated by
+    int m_hoverMarkerPos;   // Where to display the hover marker
+    bool m_hoverMarkerEnabled;  // Whether or not to display the hover marker
 
     QGraphicsView * m_heartGraph;   // The QGraphicsView representing the heartrate graph
     QGraphicsView * m_sweatGraph;   // The QGraphicsView representing the sweat graph

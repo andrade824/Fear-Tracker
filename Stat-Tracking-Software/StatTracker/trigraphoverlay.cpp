@@ -56,6 +56,15 @@ void TriGraphOverlay::paintEvent(QPaintEvent *)
     drawYLabels(&painter, m_heartItem, thirdHeight);
     drawYLabels(&painter, m_sweatItem, thirdHeight * 2);
     drawYLabels(&painter, m_jumpItem, thirdHeight * 3);
+
+    // Draw hover marker
+    if(m_hoverMarkerEnabled)
+    {
+        QPen hoverpen(QColor("orange"));
+        hoverpen.setWidth(3);
+        painter.setPen(hoverpen);
+        painter.drawLine(m_hoverMarkerPos + m_xoffset + 1, 0, m_hoverMarkerPos + m_xoffset + 1, height());
+    }
 }
 
 /**
@@ -96,6 +105,26 @@ void TriGraphOverlay::drawYLabels(QPainter * painter, GraphItem * graph, int yof
             painter->drawText(m_xoffset - 25, yoffset - i + 5, QString::number(unitsPerLabel * num + graph->getMinY()));
         }
     }
+}
+
+/**
+ * @brief Display the hover marker over the provided data node
+ * @param node The node to hover over
+ */
+void TriGraphOverlay::displayHoverMarker(FearDataNode node)
+{
+    m_hoverMarkerEnabled = true;
+    m_hoverMarkerPos = m_heartGraph->mapFromScene(node.GetTime() - m_heartItem->getMinX(), 0).x();
+    update();
+}
+
+/**
+ * @brief Disable the hover marker
+ */
+void TriGraphOverlay::disableHoverMarker()
+{
+    m_hoverMarkerEnabled = false;
+    update();
 }
 
 /**

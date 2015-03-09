@@ -36,9 +36,9 @@ void GraphItem::paint(QPainter * painter, const QStyleOptionGraphicsItem *, QWid
 
         for(int i = 0; i < m_data->count() - 1; ++i)
         {
-            painter->drawLine(m_data->at(i).GetTimeFromStart() - m_minX,
+            painter->drawLine(m_data->at(i).GetTime() - m_minX,
                               m_maxY - m_data->at(i).GetData(m_type),
-                              m_data->at(i + 1).GetTimeFromStart() - m_minX,
+                              m_data->at(i + 1).GetTime() - m_minX,
                               m_maxY - m_data->at(i + 1).GetData(m_type));
         }
     }
@@ -55,8 +55,8 @@ void GraphItem::setData(QList<FearDataNode> * newData)
     prepareGeometryChange();
 
     // Find minimum and maximum X coordinates
-    m_minX = m_data->front().GetTimeFromStart();
-    m_maxX = m_data->back().GetTimeFromStart();
+    m_minX = m_data->front().GetTime();
+    m_maxX = m_data->back().GetTime();
 
     // Find minimum and maximum Y coordinates
     unsigned short data = 0;

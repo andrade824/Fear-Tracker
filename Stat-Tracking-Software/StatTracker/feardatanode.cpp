@@ -9,7 +9,7 @@
  * @param parent The parent QObject of this object
  */
 FearDataNode::FearDataNode()
-    : m_timeFromStart(QDateTime::currentMSecsSinceEpoch()), m_jumpScare(false), m_sweat(0),
+    : m_timeFromStart(QDateTime::currentMSecsSinceEpoch()), m_accelLevel(0), m_sweat(0),
       m_heartRate(0), m_fearLevel(0)
 { }
 
@@ -23,9 +23,9 @@ FearDataNode::FearDataNode()
  * @param fearlevel The victim's overall fear level
  * @param parent    The parent QObject of this object
  */
-FearDataNode::FearDataNode(qint64 starttime, bool jump,
+FearDataNode::FearDataNode(qint64 starttime, quint8 accel,
                            quint8 sweat, quint8 heartrate, quint8 fearlevel)
-    : m_timeFromStart(QDateTime::currentMSecsSinceEpoch() - starttime), m_jumpScare(jump),
+    : m_timeFromStart(QDateTime::currentMSecsSinceEpoch() - starttime), m_accelLevel(accel),
       m_sweat(sweat), m_heartRate(heartrate), m_fearLevel(fearlevel)
 { }
 
@@ -35,7 +35,7 @@ FearDataNode::FearDataNode(qint64 starttime, bool jump,
  * @param copy The other data node to copy
  */
 FearDataNode::FearDataNode(const FearDataNode &copy)
-    : m_timeFromStart(QDateTime::currentMSecsSinceEpoch()), m_jumpScare(false), m_sweat(0),
+    : m_timeFromStart(QDateTime::currentMSecsSinceEpoch()), m_accelLevel(0), m_sweat(0),
       m_heartRate(0), m_fearLevel(0)
 {
     *this = copy;
@@ -53,7 +53,7 @@ FearDataNode *FearDataNode::operator=(const FearDataNode &rhs)
     if(this != &rhs)
     {
         m_timeFromStart = rhs.m_timeFromStart;
-        m_jumpScare = rhs.m_jumpScare;
+        m_accelLevel = rhs.m_accelLevel;
         m_sweat = rhs.m_sweat;
         m_heartRate = rhs.m_heartRate;
         m_fearLevel = rhs.m_fearLevel;
@@ -76,7 +76,7 @@ quint8 FearDataNode::GetData(FearType type) const
     switch(type)
     {
         case TYPE_HEART: data = m_heartRate; break;
-        case TYPE_JUMP: data = m_jumpScare; break;
+        case TYPE_JUMP: data = m_accelLevel; break;
         case TYPE_SWEAT: data = m_sweat; break;
         case TYPE_FEAR: data = m_fearLevel; break;
         default: data = 0; break;
@@ -96,7 +96,7 @@ void FearDataNode::SetData(FearType type, quint8 data)
     switch(type)
     {
         case TYPE_HEART: m_heartRate = data; break;
-        case TYPE_JUMP: m_jumpScare = data; break;
+        case TYPE_JUMP: m_accelLevel = data; break;
         case TYPE_SWEAT: m_sweat = data; break;
         case TYPE_FEAR: m_fearLevel = data; break;
         default: break;
@@ -106,11 +106,11 @@ void FearDataNode::SetData(FearType type, quint8 data)
 /**
  * Getters
  */
-quint64 FearDataNode::GetTimeFromStart() const
+quint64 FearDataNode::GetTime() const
 { return m_timeFromStart; }
 
-bool FearDataNode::GetJumpScare() const
-{ return m_jumpScare; }
+quint8 FearDataNode::GetAccelLevel() const
+{ return m_accelLevel; }
 
 quint8 FearDataNode::GetSweat() const
 { return m_sweat; }
@@ -127,8 +127,8 @@ quint8 FearDataNode::GetFearLevel() const
 void FearDataNode::SetTimeFromStart(qint64 starttime)
 { m_timeFromStart = QDateTime::currentMSecsSinceEpoch() - starttime; }
 
-void FearDataNode::SetJumpScare(bool jump)
-{ m_jumpScare = jump; }
+void FearDataNode::SetAccelLevel(quint8 accel)
+{ m_accelLevel = accel; }
 
 void FearDataNode::SetSweat(quint8 sweat)
 { m_sweat = sweat; }

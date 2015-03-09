@@ -12,7 +12,7 @@
  * @param parent The parent to this widget
  */
 Timeline::Timeline(QWidget * parent)
-    : QGraphicsView(parent), m_leftMarkerPos(0), m_rightMarkerPos(MARKER_PADDING),
+    : QGraphicsView(parent), m_markersEnabled(false), m_leftMarkerPos(0), m_rightMarkerPos(MARKER_PADDING),
       m_leftMarkerMoving(false), m_rightMarkerMoving(false)
 {
     // Set up the scene
@@ -45,7 +45,7 @@ void Timeline::resizeEvent(QResizeEvent * event)
     if(event->oldSize().width() == -1)
     {
         m_leftMarkerPos = 0;
-        m_rightMarkerPos = event->size().width() - MARKER_WIDTH;
+        m_rightMarkerPos = event->size().width();
     }
     else
     {
@@ -71,37 +71,41 @@ void Timeline::paintEvent(QPaintEvent * event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Setup the pen for the lines
-    QPen pen(Qt::yellow);
+    QPen pen(QColor("orange"));
     pen.setWidth(MARKER_WIDTH);
     painter.setPen(pen);
 
-    // draw markers
-    painter.drawLine(m_leftMarkerPos, 0, m_leftMarkerPos, height());
-    painter.drawLine(m_rightMarkerPos, 0, m_rightMarkerPos, height());
-
-    // Only display marker labels when markers are moving
-    if(m_leftMarkerMoving || m_rightMarkerMoving)
+    // Draw markers if enabled
+    if(m_markersEnabled)
     {
-        // Setup the font for the labels
-        QFont font;
-        font.setFamily("sans-serif");
-        font.setPointSize(8);
-        painter.setFont(font);
+        painter.drawLine(m_leftMarkerPos, 0, m_leftMarkerPos, height());
+        painter.drawLine(m_rightMarkerPos, 0, m_rightMarkerPos, height());
 
-        // The strings to display
-        QString leftMarkerText = Utilities::milliToTime(mapToScene(m_leftMarkerPos,0).x());
-        QString rightMarkerText = Utilities::milliToTime(mapToScene(m_rightMarkerPos,0).x());
+        // Only display marker labels when markers are moving
+        if(m_leftMarkerMoving || m_rightMarkerMoving)
+        {
+            // Setup the font for the labels
+            QFont font;
+            font.setFamily("sans-serif");
+            font.setPointSize(8);
+            painter.setFont(font);
 
-        // Draw rectangles for labels
-        pen.setWidth(2);
-        painter.drawRect(m_leftMarkerPos, 0, 80, 20);
-        painter.drawRect(m_rightMarkerPos, 0, 80, 20);
+            // The strings to display
+            QString leftMarkerText = Utilities::milliToTime(mapToScene(m_leftMarkerPos,0).x());
+            QString rightMarkerText = Utilities::milliToTime(mapToScene(m_rightMarkerPos,0).x());
 
-        // Draw labels
-        pen.setColor(Qt::gray);
-        painter.setPen(pen);
-        painter.drawText(m_leftMarkerPos + 5, 15, leftMarkerText);
-        painter.drawText(m_rightMarkerPos + 5, 15, rightMarkerText);
+            // Draw rectangles for labels
+            pen.setWidth(2);
+            painter.setPen(pen);
+            painter.drawRect(m_leftMarkerPos, 0, 80, 20);
+            painter.drawRect(m_rightMarkerPos, 0, 80, 20);
+
+            // Draw labels
+            pen.setColor(Qt::gray);
+            painter.setPen(pen);
+            painter.drawText(m_leftMarkerPos + 5, 15, leftMarkerText);
+            painter.drawText(m_rightMarkerPos + 5, 15, rightMarkerText);
+        }
     }
 }
 
@@ -110,14 +114,15 @@ void Timeline::paintEvent(QPaintEvent * event)
  */
 void Timeline::mousePressEvent(QMouseEvent * event)
 {
-    qDebug() << "Mouse pressed: " << event->x() << " | " << event->y();
-
-    // If they clicked near the left marker, change it's state
-    if(event->x() < m_leftMarkerPos + 3 && event->x() > m_leftMarkerPos - 3)
-        m_leftMarkerMoving = true;
-    // If they clicked near the right marker, change it's state
-    else if(event->x() < m_rightMarkerPos + 3 && event->x() > m_rightMarkerPos - 3)
-        m_rightMarkerMoving = true;
+    if(m_markersEnabled)
+    {
+        // If they clicked near the left marker, change it's state
+        if(event->x() < m_leftMarkerPos + MARKER_WIDTH && event->x() > m_leftMarkerPos - MARKER_WIDTH)
+            m_leftMarkerMoving = true;
+        // If they clicked near the right marker, change it's state
+        else if(event->x() < m_rightMarkerPos + MARKER_WIDTH && event->x() > m_rightMarkerPos - MARKER_WIDTH)
+            m_rightMarkerMoving = true;
+    }
 
     event->accept();
 }
@@ -127,25 +132,25 @@ void Timeline::mousePressEvent(QMouseEvent * event)
  */
 void Timeline::mouseMoveEvent(QMouseEvent * event)
 {
-    // Update the cursor if mouse is over marker or marker is moving
-    if(m_leftMarkerMoving || m_rightMarkerMoving)
-        setCursor(Qt::SplitHCursor);
-    else if(event->x() < m_leftMarkerPos + 3 && event->x() > m_leftMarkerPos - 3)
-        setCursor(Qt::SplitHCursor);
-    else if(event->x() < m_rightMarkerPos + 3 && event->x() > m_rightMarkerPos - 3)
-        setCursor(Qt::SplitHCursor);
-    else
-        setCursor(Qt::ArrowCursor);
+    if(m_markersEnabled)
+    {
+        // Update the cursor if mouse is over marker or marker is moving
+        if(m_leftMarkerMoving || m_rightMarkerMoving)
+            setCursor(Qt::SplitHCursor);
+        else if((event->x() < m_leftMarkerPos + MARKER_WIDTH) && (event->x() > m_leftMarkerPos - MARKER_WIDTH))
+            setCursor(Qt::SplitHCursor);
+        else if((event->x() < m_rightMarkerPos + MARKER_WIDTH) && (event->x() > m_rightMarkerPos - MARKER_WIDTH))
+            setCursor(Qt::SplitHCursor);
+        else
+            setCursor(Qt::ArrowCursor);
 
-    // Update markers
-    if(m_leftMarkerMoving && event->x() < (m_rightMarkerPos - MARKER_PADDING))
-        m_leftMarkerPos = event->x();
-    else if(m_rightMarkerMoving && event->x() > (m_leftMarkerPos + MARKER_PADDING))
-        m_rightMarkerPos = event->x();
+        // Update markers
+        if(m_leftMarkerMoving && event->x() < (m_rightMarkerPos - MARKER_PADDING))
+            m_leftMarkerPos = event->x();
+        else if(m_rightMarkerMoving && event->x() > (m_leftMarkerPos + MARKER_PADDING))
+            m_rightMarkerPos = event->x();
+    }
 
-    qDebug() << "Mouse moved: " << event->x() << " | " << event->y();
-    qDebug() << "Left marker: " << m_leftMarkerPos;
-    qDebug() << "Right marker: " << m_rightMarkerPos;
     event->accept();
 }
 
@@ -155,32 +160,32 @@ void Timeline::mouseMoveEvent(QMouseEvent * event)
  */
 void Timeline::mouseReleaseEvent(QMouseEvent * event)
 {
-    setCursor(Qt::ArrowCursor);
-
-    qDebug() << "Mouse released: " << event->x() << " | " << event->y();
-    qDebug() << "Left marker: " << m_leftMarkerPos;
-    qDebug() << "Right marker: " << m_rightMarkerPos << " | " << width();
-
-    // Send out a signal saying that the markers moved
-    if(m_leftMarkerMoving || m_rightMarkerMoving)
+    if(m_markersEnabled)
     {
-        if(mapToScene(m_leftMarkerPos, 0).x() < 0)
-            m_leftMarkerPos = mapFromScene(0,0).x();
+        setCursor(Qt::ArrowCursor);
 
-        if(m_rightMarkerPos < MARKER_PADDING)
-            m_rightMarkerPos = m_leftMarkerPos + MARKER_PADDING;
+        // Send out a signal saying that the markers moved
+        if(m_leftMarkerMoving || m_rightMarkerMoving)
+        {
+            if(mapToScene(m_leftMarkerPos, 0).x() < 0)
+                m_leftMarkerPos = mapFromScene(0,0).x();
 
-        if(m_rightMarkerPos > width())
-            m_rightMarkerPos = width() - MARKER_WIDTH;
+            if(m_rightMarkerPos < MARKER_PADDING)
+                m_rightMarkerPos = m_leftMarkerPos + MARKER_PADDING;
 
-        if(m_leftMarkerPos > width())
-            m_leftMarkerPos = m_rightMarkerPos - MARKER_PADDING;
+            if(m_rightMarkerPos > width())
+                m_rightMarkerPos = width() - MARKER_WIDTH;
 
-        emit markersMoved(mapToScene(m_leftMarkerPos, 0).x(), mapToScene(m_rightMarkerPos, 0).x());
+            if(m_leftMarkerPos > width())
+                m_leftMarkerPos = m_rightMarkerPos - MARKER_PADDING;
+
+            emit markersMoved(mapToScene(m_leftMarkerPos, 0).x(), mapToScene(m_rightMarkerPos, 0).x());
+        }
+
+        // Markers aren't moving anymore
+        m_leftMarkerMoving = false;
+        m_rightMarkerMoving = false;
     }
-    // Markers aren't moving anymore
-    m_leftMarkerMoving = false;
-    m_rightMarkerMoving = false;
 
     event->accept();
 }
@@ -192,6 +197,16 @@ void Timeline::mouseReleaseEvent(QMouseEvent * event)
 void Timeline::setDataStore(FearData * data_store)
 {
     m_dataStore = data_store;
+}
+
+/**
+ * @brief Enable the markers for analyzing mode
+ *
+ * @param enabled Whether to enable the markers or not
+ */
+void Timeline::enableMarkers(bool enabled)
+{
+    m_markersEnabled = enabled;
 }
 
 /**

@@ -24,6 +24,9 @@ public:
     // Return a list of all the nodes between the two times
     QList<FearDataNode> getData(quint64 start, quint64 end) const;
 
+    // Get the nearest node to the time given
+    FearDataNode getNearestNode(quint64 time) const;
+
     // Returns the number of nodes currently being stored
     int countDataNodes() const;
 

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "utilities.h"
 #include <QVBoxLayout>
 #include <QSerialPortInfo>
 #include <QDebug>
@@ -28,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     FillPortsInfo();
 
     // Connect everything up
+    connect(ui->triGraph, SIGNAL(dataHovered(FearDataNode)), this, SLOT(displayHoveredData(FearDataNode)));
+    connect(ui->triGraph, SIGNAL(noHovering()), this, SLOT(clearHovereredData()));
     connect(ui->timeline, SIGNAL(markersMoved(quint64,quint64)), ui->triGraph, SLOT(getAnalyzeData(quint64,quint64)));
     connect(m_data, SIGNAL(newDataStored(FearData*)), ui->triGraph, SLOT(getRealtimeData()));
     connect(m_data, SIGNAL(newDataStored(FearData*)), ui->timeline, SLOT(displayLatestData()));
@@ -46,6 +49,35 @@ void MainWindow::OpenSerialPort()
     m_btnConnect->setEnabled(false);
 }
 
+/**
+ * @brief Display data about the node that's currently being hovered over
+ *
+ * @param data The node who's info to display
+ */
+void MainWindow::displayHoveredData(FearDataNode data)
+{
+    ui->leTime->setText(Utilities::milliToTime(data.GetTime()));
+    ui->leHeartRate->setText(QString::number(data.GetHeartRate()));
+    ui->leSweat->setText(QString::number(data.GetSweat()));
+    ui->leAccel->setText(QString::number(data.GetAccelLevel()));
+    ui->leFearScore->setText(QString::number(data.GetFearLevel()));
+}
+
+/**
+ * @brief Clear out the textboxes used for displaying hovered data
+ */
+void MainWindow::clearHovereredData()
+{
+    ui->leTime->setText("");
+    ui->leHeartRate->setText("");
+    ui->leSweat->setText("");
+    ui->leAccel->setText("");
+    ui->leFearScore->setText("");
+}
+
+/**
+ * @brief Fill the serial ports combo box with all available serial ports
+ */
 void MainWindow::FillPortsInfo()
 {
     m_cmbSerialPort->clear();
@@ -66,5 +98,36 @@ void MainWindow::FillPortsInfo()
         m_cmbSerialPort->addItem("No Serial Ports");
         m_cmbSerialPort->setEnabled(false);
         m_btnConnect->setEnabled(false);
+    }
+}
+
+/**
+ * @brief Close the window on File->Exit
+ */
+void MainWindow::on_action_Exit_triggered()
+{
+    this->close();
+}
+
+/**
+ * @brief Switches between Real-time mode and analyzing mode
+ *
+ * @param mode True if in real-time mode
+ */
+void MainWindow::on_actionChange_Mode_toggled(bool mode)
+{
+    // Real-time mode
+    if(mode)
+    {
+        ui->actionChange_Mode->setText("Analyze Mode");
+        ui->triGraph->setMode(TriGraph::MODE_REALTIME);
+        ui->timeline->enableMarkers(false);
+    }
+    // Analyze mode
+    else
+    {
+        ui->actionChange_Mode->setText("Real-time Mode");
+        ui->triGraph->setMode(TriGraph::MODE_ANAYLZE);
+        ui->timeline->enableMarkers(true);
     }
 }

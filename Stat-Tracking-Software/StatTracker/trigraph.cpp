@@ -1,6 +1,7 @@
 #include "trigraph.h"
 #include <QSpacerItem>
 #include <QGraphicsView>
+#include <QDebug>
 #include "feardata.h"
 
 /**
@@ -9,12 +10,12 @@
  * @param parent The widget that owns this one
  */
 TriGraph::TriGraph(QWidget * parent, int yLabelPadding, GraphingMode mode)
-    : QWidget(parent), m_mode(mode)
+    : QWidget(parent), m_mode(mode), m_lastNodeHovered(0), m_numRealTimeNodes(150)
 {
     // Set up the scene
     m_heartItem = new GraphItem(TYPE_HEART, Qt::red);
     m_sweatItem = new GraphItem(TYPE_SWEAT, Qt::blue);
-    m_jumpItem = new GraphItem(TYPE_FEAR, Qt::green);
+    m_jumpItem = new GraphItem(TYPE_JUMP, Qt::green);
 
     m_scene = new QGraphicsScene(this);
     m_scene->addItem(m_heartItem);
@@ -60,9 +61,20 @@ TriGraph::TriGraph(QWidget * parent, int yLabelPadding, GraphingMode mode)
     m_sweatGraph->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_jumpGraph->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    // Make sure mouse events pass through the views
+    m_heartGraph->setAttribute(Qt::WA_TransparentForMouseEvents);
+    m_sweatGraph->setAttribute(Qt::WA_TransparentForMouseEvents);
+    m_jumpGraph->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    // Turn on mouse tracking to always track the mouse when hovering
+    setMouseTracking(true);
 
     // Set up the overlay
     m_overlay = new TriGraphOverlay(yLabelPadding, 100, m_heartGraph, m_sweatGraph, m_jumpGraph, m_heartItem, m_sweatItem, m_jumpItem, this);
+
+    // Connect up signals between the trigraph and it's overlay
+    connect(this, SIGNAL(dataHovered(FearDataNode)), m_overlay, SLOT(displayHoverMarker(FearDataNode)));
+    connect(this, SIGNAL(noHovering()), m_overlay, SLOT(disableHoverMarker()));
 }
 
 /**
@@ -75,6 +87,40 @@ void TriGraph::resizeEvent(QResizeEvent * event)
     m_jumpGraph->fitInView(m_jumpItem);
     m_overlay->resize(event->size());
     event->accept();
+}
+
+/**
+ * @brief Display data about the notde being hovered over
+ */
+void TriGraph::mouseMoveEvent(QMouseEvent *event)
+{
+    FearDataNode nearestNode;
+
+    if(m_mode == MODE_ANAYLZE && m_data.count() > 0 && event->x() >= 30)
+    {
+        nearestNode = m_dataStore->getNearestNode(m_heartGraph->mapToScene(event->x() - 30, 0).x() + m_heartItem->getMinX());
+
+        if(nearestNode.GetTime() != m_lastNodeHovered)
+        {
+            emit dataHovered(nearestNode);
+            m_lastNodeHovered = nearestNode.GetTime();
+        }
+
+        event->accept();
+    }
+}
+
+/**
+ * @brief Stop displaying data about nodes being hovered over
+ */
+void TriGraph::leaveEvent(QEvent * event)
+{
+    if(m_mode == MODE_ANAYLZE)
+    {
+        emit noHovering();
+
+        event->accept();
+    }
 }
 
 /**
@@ -94,6 +140,19 @@ void TriGraph::setMode(TriGraph::GraphingMode mode)
 void TriGraph::setDataStore(FearData * data_store)
 {
     m_dataStore = data_store;
+}
+
+/**
+ * @brief Set the number of nodes to display in real time mode
+ *
+ * @param num_nodes The numbef of nodes
+ */
+void TriGraph::setNumRealTimeNodes(int num_nodes)
+{
+    if(num_nodes > 0)
+        m_numRealTimeNodes = num_nodes;
+    else
+        m_numRealTimeNodes = 150;
 }
 
 /**

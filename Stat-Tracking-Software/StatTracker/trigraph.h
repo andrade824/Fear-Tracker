@@ -8,6 +8,7 @@
 #include <QGraphicsView>
 #include <QPaintEvent>
 #include <QResizeEvent>
+#include <QMouseEvent>
 #include "graphitem.h"
 #include "feardata.h"
 #include "trigraphoverlay.h"
@@ -22,10 +23,16 @@ public:
 
     // Constructor
     explicit TriGraph(QWidget * parent = 0, int yLabelPadding = 30,
-                      GraphingMode mode = MODE_ANAYLZE);
+                      GraphingMode mode = MODE_REALTIME);
 
     // Pass the resize event down the chain of graphics views
     virtual void resizeEvent(QResizeEvent *event);
+
+    // Track when the mouse is hovered over the graph
+    virtual void mouseMoveEvent(QMouseEvent * event);
+
+    // Mouse has left the graphs
+    virtual void leaveEvent(QEvent * event);
 
     // Set what mode the graphs are in
     void setMode(GraphingMode mode);
@@ -33,13 +40,21 @@ public:
     // Set what data storage the graphs are using
     void setDataStore(FearData * data_store);
 
+    // Set the number of nodes to display in real time mode
+    void setNumRealTimeNodes(int num_nodes);
+
     // Destructor
-    ~TriGraph();
+    virtual ~TriGraph();
 private:
     // Displays the currently cached data
     void displayData();
 
 signals:
+    // Output a signal when a node is being hovered on
+    void dataHovered(FearDataNode data);
+
+    // No nodes are being hovered over
+    void noHovering();
 
 public slots:
     // Add latest data to the graphs
@@ -76,6 +91,12 @@ private:
 
     // What mode the graphs are in
     GraphingMode m_mode;
+
+    // The last node that was hovered over
+    quint64 m_lastNodeHovered;
+
+    // The number of nodes to display in real time mode
+    int m_numRealTimeNodes;
 };
 
 #endif // TRIGRAPH_H

@@ -12,7 +12,7 @@
 const int MARKER_PADDING = 20;
 
 // Width of the markers
-const int MARKER_WIDTH = 3;
+const int MARKER_WIDTH = 4;
 
 class Timeline : public QGraphicsView
 {
@@ -36,6 +36,9 @@ public:
     // Set what data storage the graphs are using
     void setDataStore(FearData * data_store);
 
+    // Set whether the markers are enabled
+    void enableMarkers(bool enabled);
+
     // Destructor
     ~Timeline();
 signals:
@@ -49,6 +52,9 @@ private:
     // Graphics scene to draw on and the graph to draw
     QGraphicsScene * m_scene;
     GraphItem * m_fearGraph;
+
+    // Whether to display and use markers
+    bool m_markersEnabled;
 
     // Where the markers are located
     int m_leftMarkerPos;
