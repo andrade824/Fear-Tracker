@@ -22,10 +22,7 @@
 volatile int threshold = 0;
 volatile int GSR_val = 0;
 volatile float GSRfloat = 0;
-void GSRinit()
-{
-
-}
+volatile uint8_t gsr_data;
 void GSRsetup()
 {
 	int i = 0;

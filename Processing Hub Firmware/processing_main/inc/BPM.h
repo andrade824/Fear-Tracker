@@ -11,7 +11,7 @@
 #define BPM_H_
 
 void BPMTimerSetUp();
-uint8_t GetBPM();
+int GetBPM();
 bool getFlag();
 void clearBPMFlag();
 

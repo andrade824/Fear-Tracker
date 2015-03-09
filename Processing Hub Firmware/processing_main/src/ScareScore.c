@@ -6,6 +6,9 @@
  */
 
 #include "..\inc\ScareScore.h"
+#include "..\inc\Sweat.h"
+#include "..\inc\Accel.h"
+#include "..\inc\BPM.h"
 #include "..\inc\UART.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -20,10 +23,31 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
 
+volatile uint8_t pulse_data;
+volatile uint8_t gsr_data;
+volatile uint8_t x_data;
+volatile uint8_t y_data;
+volatile uint8_t z_data;
+
 int CalcScareScore(void)
 {
 	int scare_score = 0;
-
+	if(GetBPM() > 80)
+		scare_score += 10;
+	if(GetBPM() > 90)
+		scare_score += 30;
+	if(GetBPM() > 100)
+		scare_score += 50;
+	if( gsr_data  < 80)
+		scare_score += 5;
+	if( gsr_data  < 60)
+		scare_score += 10;
+	if( gsr_data  < 40)
+		scare_score += 15;
+	if( gsr_data  < 20)
+		scare_score += 25;
+	if(Displacement() > 50)
+		scare_score += 25;
 	return scare_score;
 
 }

@@ -11,54 +11,52 @@
 #include <stdbool.h>
 
 #define SAMPLE 10
- volatile uint8_t x_datara[SAMPLE];
- volatile uint8_t y_datara[SAMPLE];
- volatile uint8_t z_datara[SAMPLE];
+
 
 volatile uint8_t x_data;
 volatile uint8_t y_data;
 volatile uint8_t z_data;
- volatile uint8_t sig[5];
+
+
+#define MAX 100
+#define MIN 1
 int Displacement()
 {
+
 	int32_t xavg = x_data;
 	int32_t yavg = y_data;
 	int32_t zavg = z_data;
-
-	uint32_t avg = 0;
-
-	if(xavg > 126)
-		xavg += 127;
-	if(yavg > 126)
-		xavg += 127;
-	if(zavg > 126)
-		xavg += 127;
 
 	xavg = xavg * xavg;
 	yavg = yavg * yavg;
 	zavg = zavg * zavg;
 
-	avg = xavg + yavg + zavg;
-	sqrt(avg);
+	int32_t avg =  yavg + zavg + xavg;
+	avg = sqrt(avg);
 
-	return avg;
+	//avg = (MAX-MIN)/(445-0)*(avg-445)+MAX;
+
+	uint8_t diplacement = avg;
+	return diplacement;
 }
 
-int32_t sqrt(int32_t n)
+uint32_t sqrt(uint32_t n)
 {
-	int32_t root = 0, bit, trial;
-		bit = (n >= 0x10000) ? 1<<30 : 1<<14;
-	do
+    int i;
+	unsigned long rem = 0;
+	unsigned long root = 0;
+	for (i = 0; i < 16; i++)
 	{
-		trial = root+bit;
-		if (n >= trial)
+		root <<= 1;
+		rem = (rem << 2) | (n >> 30);
+		n <<= 2;
+		if(root < rem)
 		{
-			n -= trial;
-			root = trial+bit;
+			root++;
+			rem -= root;
+			root++;
 		}
-		root >>= 1;
-		bit >>= 2;
-	} while (bit);
+	}
+	   return root >> 1;
 
-	return root;
 }

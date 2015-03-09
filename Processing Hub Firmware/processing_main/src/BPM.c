@@ -20,7 +20,7 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
 
-#define SAMPLESIZE  20
+#define SAMPLESIZE  10
 
 volatile _Bool firstBeat = true;
 volatile _Bool secondBeat = false;
@@ -36,14 +36,14 @@ volatile int Pulse = false;     // true when pulse wave is high, false when it's
 volatile _Bool QS = false;        // becomes true when Arduoino finds a beat.
 int amp = 100;
 
-volatile int signal = 0; // signal from wristboard adc
-volatile uint8_t BPM;
+volatile uint8_t signal = 0; // signal from wristboard adc
+volatile int BPM;
 volatile int IBI = 600;
 volatile _Bool flag = false;
 
 extern volatile uint8_t pulse_data;
 
-uint8_t GetBPM()
+int GetBPM()
 {
 	return BPM;
 }

@@ -13,7 +13,7 @@ extern volatile uint8_t z_data;
 void
 UARTIntHandler(void)
 {
-	ROM_IntMasterDisable();
+	//ROM_IntMasterDisable();
 	volatile char temp=0;
 	volatile int i = 0;
     uint32_t ui32Status;
@@ -79,7 +79,7 @@ UARTIntHandler(void)
 
 
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0);
-	ROM_IntMasterEnable();
+	//ROM_IntMasterEnable();
 }
 
 //*****************************************************************************
