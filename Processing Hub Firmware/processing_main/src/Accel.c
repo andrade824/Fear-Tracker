@@ -10,34 +10,47 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SAMPLE 10
 
 
-volatile uint8_t x_data;
-volatile uint8_t y_data;
-volatile uint8_t z_data;
+    uint8_t prevx_data = 0;
+	uint8_t prevy_data = 0;
+	uint8_t prevz_data = 0;
 
-
-#define MAX 100
-#define MIN 1
 int Displacement()
 {
 
-	int32_t xavg = x_data;
-	int32_t yavg = y_data;
-	int32_t zavg = z_data;
+	uint32_t x_dataavg = 0;
+	uint32_t y_dataavg = 0;
+	uint32_t z_dataavg = 0;
+	uint32_t x_dis = 0;
+	uint32_t y_dis = 0;
+	uint32_t z_dis = 0;
 
-	xavg = xavg * xavg;
-	yavg = yavg * yavg;
-	zavg = zavg * zavg;
+	int i = 0;
+	uint8_t displacement = 0;
+	for(i = 0; i < MAXITEMS; i++)
+	{
+		x_dataavg += sensor[i].x_data;
+		y_dataavg += sensor[i].y_data;
+		z_dataavg += sensor[i].z_data;
+	}
 
-	int32_t avg =  yavg + zavg + xavg;
-	avg = sqrt(avg);
+	x_dataavg /= MAXITEMS;
+	y_dataavg /= MAXITEMS;
+	z_dataavg /= MAXITEMS;
 
-	//avg = (MAX-MIN)/(445-0)*(avg-445)+MAX;
+	x_dis = x_dataavg - prevx_data;
+	y_dis = y_dataavg - prevy_data;
+	z_dis = z_dataavg - prevz_data;
 
-	uint8_t diplacement = avg;
-	return diplacement;
+	displacement =( x_dis + y_dis + z_dis) / 3;
+
+	prevx_data = x_dataavg;
+	prevy_data = y_dataavg;
+	prevz_data = z_dataavg;
+
+
+	return displacement;
 }
 
 uint32_t sqrt(uint32_t n)

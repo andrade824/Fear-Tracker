@@ -52,7 +52,7 @@ volatile uint8_t z_data;
 			ROM_UARTCharPut( UART0_BASE, 0xAA );
 
 			ROM_UARTCharPut( UART0_BASE, Displacement());
-			ROM_UARTCharPut( UART0_BASE, gsr_data);
+			ROM_UARTCharPut( UART0_BASE, sensor[curr_item].gsr_data);
 			ROM_UARTCharPut( UART0_BASE, GetBPM() );
 			ROM_UARTCharPut( UART0_BASE, CalcScareScore() );
 

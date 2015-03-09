@@ -41,7 +41,6 @@ volatile int BPM;
 volatile int IBI = 600;
 volatile _Bool flag = false;
 
-extern volatile uint8_t pulse_data;
 
 int GetBPM()
 {
@@ -94,7 +93,7 @@ void Timer0IntHandler(void)
 
 	//isr triggers every 2 ms
 	volatile int i = 0;
-	signal = pulse_data;
+	signal = sensor[curr_item].pulse_data;
 	sampleCounter += 2; // plus 2 ms
 	volatile int N = sampleCounter - lastBeatTime;
 
