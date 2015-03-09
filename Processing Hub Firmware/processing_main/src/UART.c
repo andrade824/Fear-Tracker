@@ -1,10 +1,9 @@
 #include "..\inc\UART.h"
-volatile uint8_t sig[5];
-extern volatile uint8_t pulse_data;
-extern volatile uint8_t gsr_data;
-extern volatile uint8_t x_data;
-extern volatile uint8_t y_data;
-extern volatile uint8_t z_data;
+
+ volatile struct sensor_data sensor[MAXITEMS];
+
+ volatile int curr_item = 0;
+
 //*****************************************************************************
 //
 // The UART interrupt handler.
@@ -38,14 +37,17 @@ UARTIntHandler(void)
 		{
 			if( ROM_UARTCharGetNonBlocking(UART1_BASE) == 24 )
 			{
-				pulse_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
-				gsr_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
-				x_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
-				y_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
-				z_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				if(curr_item == MAXITEMS)
+					curr_item = 0;
+				sensor[curr_item].pulse_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				sensor[curr_item].gsr_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				sensor[curr_item].x_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				sensor[curr_item].y_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				sensor[curr_item].z_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
 
 				while(ROM_UARTCharsAvail(UART1_BASE))
 				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				curr_item++;
 
 			}
 
@@ -175,9 +177,3 @@ void UART0init()
 
 	  //UARTClockSourceSet(UART0_BASE, UART_CLOCK_PIOSC);
 }
-
-uint8_t GetSig()
-{
-	return sig[0];
-}
-

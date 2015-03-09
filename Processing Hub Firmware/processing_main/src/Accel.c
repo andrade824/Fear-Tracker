@@ -10,55 +10,66 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SAMPLE 10
- volatile uint8_t x_datara[SAMPLE];
- volatile uint8_t y_datara[SAMPLE];
- volatile uint8_t z_datara[SAMPLE];
 
-volatile uint8_t x_data;
-volatile uint8_t y_data;
-volatile uint8_t z_data;
- volatile uint8_t sig[5];
+
+    uint8_t prevx_data = 0;
+	uint8_t prevy_data = 0;
+	uint8_t prevz_data = 0;
+
 int Displacement()
 {
-	int32_t xavg = x_data;
-	int32_t yavg = y_data;
-	int32_t zavg = z_data;
 
-	uint32_t avg = 0;
+	uint32_t x_dataavg = 0;
+	uint32_t y_dataavg = 0;
+	uint32_t z_dataavg = 0;
+	uint32_t x_dis = 0;
+	uint32_t y_dis = 0;
+	uint32_t z_dis = 0;
 
-	if(xavg > 126)
-		xavg += 127;
-	if(yavg > 126)
-		xavg += 127;
-	if(zavg > 126)
-		xavg += 127;
+	int i = 0;
+	uint8_t displacement = 0;
+	for(i = 0; i < MAXITEMS; i++)
+	{
+		x_dataavg += sensor[i].x_data;
+		y_dataavg += sensor[i].y_data;
+		z_dataavg += sensor[i].z_data;
+	}
 
-	xavg = xavg * xavg;
-	yavg = yavg * yavg;
-	zavg = zavg * zavg;
+	x_dataavg /= MAXITEMS;
+	y_dataavg /= MAXITEMS;
+	z_dataavg /= MAXITEMS;
 
-	avg = xavg + yavg + zavg;
-	sqrt(avg);
+	x_dis = x_dataavg - prevx_data;
+	y_dis = y_dataavg - prevy_data;
+	z_dis = z_dataavg - prevz_data;
 
-	return avg;
+	displacement =( x_dis + y_dis + z_dis) / 3;
+
+	prevx_data = x_dataavg;
+	prevy_data = y_dataavg;
+	prevz_data = z_dataavg;
+
+
+	return displacement;
 }
 
-int32_t sqrt(int32_t n)
+uint32_t sqrt(uint32_t n)
 {
-	int32_t root = 0, bit, trial;
-		bit = (n >= 0x10000) ? 1<<30 : 1<<14;
-	do
+    int i;
+	unsigned long rem = 0;
+	unsigned long root = 0;
+	for (i = 0; i < 16; i++)
 	{
-		trial = root+bit;
-		if (n >= trial)
+		root <<= 1;
+		rem = (rem << 2) | (n >> 30);
+		n <<= 2;
+		if(root < rem)
 		{
-			n -= trial;
-			root = trial+bit;
+			root++;
+			rem -= root;
+			root++;
 		}
-		root >>= 1;
-		bit >>= 2;
-	} while (bit);
+	}
+	   return root >> 1;
 
-	return root;
 }
