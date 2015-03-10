@@ -10,16 +10,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+uint32_t prevx_data = 0;
+uint32_t prevy_data = 0;
+uint32_t prevz_data = 0;
 
-
-    uint8_t prevx_data = 0;
-	uint8_t prevy_data = 0;
-	uint8_t prevz_data = 0;
-
-int Displacement()
+uint8_t Displacement()
 {
-
-	uint32_t x_dataavg = 0;
+	/*uint32_t x_dataavg = 0;
 	uint32_t y_dataavg = 0;
 	uint32_t z_dataavg = 0;
 	uint32_t x_dis = 0;
@@ -43,11 +40,13 @@ int Displacement()
 	y_dis = y_dataavg - prevy_data;
 	z_dis = z_dataavg - prevz_data;
 
-	displacement =( x_dis + y_dis + z_dis) / 3;
+	displacement = (x_dis + y_dis + z_dis) / 3;
 
 	prevx_data = x_dataavg;
 	prevy_data = y_dataavg;
-	prevz_data = z_dataavg;
+	prevz_data = z_dataavg;*/
+
+	uint8_t displacement = (sensor[curr_item].x_data + sensor[curr_item].y_data + sensor[curr_item].z_data) / 3;
 
 
 	return displacement;

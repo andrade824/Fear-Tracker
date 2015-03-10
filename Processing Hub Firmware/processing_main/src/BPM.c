@@ -20,7 +20,7 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
 
-#define SAMPLESIZE  10
+#define SAMPLESIZE  20
 
 volatile _Bool firstBeat = true;
 volatile _Bool secondBeat = false;
@@ -38,12 +38,24 @@ int amp = 100;
 
 volatile uint8_t signal = 0; // signal from wristboard adc
 volatile int BPM;
+volatile int BPMra[SAMPLESIZE];
 volatile int IBI = 600;
 volatile _Bool flag = false;
 
 
 int GetBPM()
 {
+	/*int BMPtotal;
+	int i = 0;
+	for( i = 0; i <=( SAMPLESIZE - 2); i++)
+	{
+		BPMra[i] = BPMra[i+1];
+		BMPtotal = BMPtotal + BPMra[i];
+	}
+
+	BPMra[SAMPLESIZE - 1] = BPM;
+	BMPtotal = BMPtotal + BPMra[SAMPLESIZE - 1];
+	BPM = BMPtotal / SAMPLESIZE;*/
 	return BPM;
 }
 _Bool getFlag()
@@ -94,7 +106,7 @@ void Timer0IntHandler(void)
 	//isr triggers every 2 ms
 	volatile int i = 0;
 	signal = sensor[curr_item].pulse_data;
-	sampleCounter += 2; // plus 2 ms
+	sampleCounter += 3; // plus 2 ms
 	volatile int N = sampleCounter - lastBeatTime;
 
 
@@ -155,6 +167,9 @@ void Timer0IntHandler(void)
 				BPM = 60000/runningTotal;
 				//BPM = BPM / 3;
 				flag = true;
+
+
+
 
 		}
 	}

@@ -26,12 +26,8 @@
 	</natures>
 	<variableList>
 		<variable>
-			<name>ORIGINAL_PROJECT_ROOT</name>
-			<value>file:/C:/ti/TivaWare_C_Series-1.1/examples/boards/ek-tm4c123gxl/uart_echo/ccs/</value>
-		</variable>
-		<variable>
-			<name>SW_ROOT</name>
-			<value>$%7BPARENT-5-ORIGINAL_PROJECT_ROOT%7D</value>
+			<name>TIVAWARE_INSTALL</name>
+			<value>file:/C:/ti/TivaWare_C_Series-2.1.0.12573</value>
 		</variable>
 	</variableList>
 </projectDescription>

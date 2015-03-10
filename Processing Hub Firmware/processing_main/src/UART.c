@@ -1,8 +1,10 @@
 #include "..\inc\UART.h"
 
- volatile struct sensor_data sensor[MAXITEMS];
+volatile struct sensor_data sensor[MAXITEMS];
 
- volatile int curr_item = 0;
+volatile int curr_item = 0;
+
+volatile extern _Bool send_flag;
 
 //*****************************************************************************
 //
@@ -38,29 +40,25 @@ UARTIntHandler(void)
 			if( ROM_UARTCharGetNonBlocking(UART1_BASE) == 24 )
 			{
 				if(curr_item == MAXITEMS)
+				{
 					curr_item = 0;
+					//send_flag = true;
+				}
 				sensor[curr_item].pulse_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
 				sensor[curr_item].gsr_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
 				sensor[curr_item].x_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
 				sensor[curr_item].y_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
 				sensor[curr_item].z_data = ROM_UARTCharGetNonBlocking(UART1_BASE);
 
-				while(ROM_UARTCharsAvail(UART1_BASE))
+				// Clear out dummy zeroes
 				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
+				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
+
 				curr_item++;
+				//send_flag = true;
 
 			}
 
-			else
-			{
-				 while(ROM_UARTCharsAvail(UART1_BASE))
-					temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
-			}
-		}
-		else
-		{
-			while(ROM_UARTCharsAvail(UART1_BASE))
-				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
 		}
 
     }
@@ -133,15 +131,15 @@ void UART1init(void)
 
     //
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_UART1);
-    SysCtlDelay(3);
+    ROM_SysCtlDelay(3);
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-    SysCtlDelay(3);
+    ROM_SysCtlDelay(3);
     //
     // Enable processor interrupts.
     //
     // Set GPIO B0 and A1 as UART pins.
     //
-    GPIOPinConfigure(GPIO_PB0_U1RX);
+    ROM_GPIOPinConfigure(GPIO_PB0_U1RX);
     ROM_GPIOPinTypeUART(GPIO_PORTB_BASE, GPIO_PIN_0| GPIO_PIN_1);
     //
     // Configure the UART for 38400, 8-N-1 operation.
@@ -150,8 +148,8 @@ void UART1init(void)
                             (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                              UART_CONFIG_PAR_NONE));
     // Configure FIFO for 1/2th receive full
-    UARTFIFOLevelSet(UART1_BASE, UART_FIFO_TX4_8,UART_FIFO_RX4_8);
-
+    ROM_UARTFIFOEnable(UART1_BASE);
+    ROM_UARTFIFOLevelSet(UART1_BASE, UART_FIFO_TX4_8,UART_FIFO_RX4_8);
 
     //UARTClockSourceSet(UART1_BASE, UART_CLOCK_PIOSC);
 

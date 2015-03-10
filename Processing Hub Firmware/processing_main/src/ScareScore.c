@@ -34,19 +34,21 @@ int CalcScareScore(void)
 	int scare_score = 0;
 	if(GetBPM() > 80)
 		scare_score += 10;
-	if(GetBPM() > 90)
+	else if(GetBPM() > 90)
 		scare_score += 30;
-	if(GetBPM() > 100)
+	else if(GetBPM() > 100)
 		scare_score += 50;
+
 	if( gsr_data  < 80)
 		scare_score += 5;
-	if( gsr_data  < 60)
+	else if( gsr_data  < 60)
 		scare_score += 10;
-	if( gsr_data  < 40)
+	else if( gsr_data  < 40)
 		scare_score += 15;
-	if( gsr_data  < 20)
+	else if( gsr_data  < 20)
 		scare_score += 25;
-	if(Displacement() > 50)
+
+	if(Displacement() > 160)
 		scare_score += 25;
 	return scare_score;
 

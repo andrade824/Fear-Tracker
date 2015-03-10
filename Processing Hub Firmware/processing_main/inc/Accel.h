@@ -10,6 +10,6 @@
 #include <stdint.h>
 uint32_t sqrt(uint32_t n);
 
-int Displacement();
+uint8_t Displacement();
 
 #endif /* FEAR_H_ */

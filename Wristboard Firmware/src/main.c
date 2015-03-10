@@ -65,9 +65,9 @@ int main(void)
 			// Send the data
 			UARTTransmit(data.pulse_val);
 			UARTTransmit(data.gsr_val);
-			UARTTransmit(data.accel_x);
-			UARTTransmit(data.accel_y);
-			UARTTransmit(data.accel_z);
+			UARTTransmit(data.accel_x + 128);
+			UARTTransmit(data.accel_y + 128);
+			UARTTransmit(data.accel_z + 128);
 			
 			UARTTransmit(0); 
 			UARTTransmit(0); //to fill the UART receive fifo buffer in the tiva board for interrupt 
