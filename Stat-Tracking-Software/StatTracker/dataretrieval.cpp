@@ -92,11 +92,14 @@ void DataRetrieval::ReadData()
                 keepLooping = true;
 
             // Send out the data if we've filled up a buffer
-            if(m_numCurBytes == SERIAL_NUM_BYTES)
+            if(m_numCurBytes == SERIAL_NUM_BYTES && m_buffer.GetSweat() > 5)
             {
                 emit newDataRetrieved(m_buffer);
                 m_numCurBytes = 0;
             }
+
+            if(m_numCurBytes == SERIAL_NUM_BYTES)
+                m_numCurBytes = 0;
         }
     } while(keepLooping);
 }

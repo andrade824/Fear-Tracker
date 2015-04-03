@@ -13,9 +13,9 @@ TriGraph::TriGraph(QWidget * parent, int yLabelPadding, GraphingMode mode)
     : QWidget(parent), m_mode(mode), m_lastNodeHovered(0), m_numRealTimeNodes(150)
 {
     // Set up the scene
-    m_heartItem = new GraphItem(TYPE_HEART, Qt::red);
-    m_sweatItem = new GraphItem(TYPE_SWEAT, Qt::blue);
-    m_jumpItem = new GraphItem(TYPE_JUMP, Qt::green);
+    m_heartItem = new GraphItem(60, 140, TYPE_HEART, Qt::red);
+    m_sweatItem = new GraphItem(0, 150, TYPE_SWEAT, Qt::blue);
+    m_jumpItem = new GraphItem(64, 200, TYPE_JUMP, Qt::green);
 
     m_scene = new QGraphicsScene(this);
     m_scene->addItem(m_heartItem);

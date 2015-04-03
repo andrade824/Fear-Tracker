@@ -1,4 +1,5 @@
 #include "..\inc\UART.h"
+#include "../inc/Accel.h"
 
 volatile struct sensor_data sensor[MAXITEMS];
 
@@ -54,9 +55,15 @@ UARTIntHandler(void)
 				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
 				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
 
-				curr_item++;
-				//send_flag = true;
+				if(curr_item == 0)
+					curr_item++;
+				else if(curr_item != 0 && sensor[curr_item].gsr_data >= 10)
+					curr_item++;
+				else
+					sensor[curr_item] = sensor[curr_item - 1];
 
+				//send_flag = true;
+				//curr_item++;
 			}
 
 		}

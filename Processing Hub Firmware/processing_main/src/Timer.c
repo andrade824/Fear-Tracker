@@ -28,7 +28,7 @@ void Timer1init(void)
 	SysCtlDelay(3);
 	// Configure 32-bit periodic timer
 	ROM_TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-	ROM_TimerLoadSet(TIMER1_BASE, TIMER_A, ROM_SysCtlClockGet()/10);
+	ROM_TimerLoadSet(TIMER1_BASE, TIMER_A, ROM_SysCtlClockGet()/15);
 	//set interrupts
 	ROM_IntEnable(INT_TIMER1A);
 	ROM_TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT); // timeout mode

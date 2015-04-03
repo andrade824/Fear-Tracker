@@ -16,7 +16,7 @@ Timeline::Timeline(QWidget * parent)
       m_leftMarkerMoving(false), m_rightMarkerMoving(false)
 {
     // Set up the scene
-    m_fearGraph = new GraphItem(TYPE_FEAR, Qt::gray);
+    m_fearGraph = new GraphItem(0, 100, TYPE_FEAR, Qt::gray);
 
     m_scene = new QGraphicsScene(this);
     m_scene->addItem(m_fearGraph);

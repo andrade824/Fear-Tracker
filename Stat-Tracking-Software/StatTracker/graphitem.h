@@ -11,7 +11,7 @@ class GraphItem : public QGraphicsItem
 
 public:
     // Default constructor
-    GraphItem(FearType type = TYPE_HEART, QColor color = Qt::red);
+    GraphItem(int miny, int maxy, FearType type = TYPE_HEART, QColor color = Qt::red);
 
     // The coordinates of this item
     QRectF boundingRect() const;

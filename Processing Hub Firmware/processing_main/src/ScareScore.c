@@ -32,11 +32,12 @@ volatile uint8_t z_data;
 int CalcScareScore(void)
 {
 	int scare_score = 0;
-	if(GetBPM() > 80)
-		scare_score += 10;
-	else if(GetBPM() > 90)
-		scare_score += 30;
-	else if(GetBPM() > 100)
+
+	// Heart rate
+	int rate = GetBPM();
+	if(rate >= 70 && rate <= 120)
+		scare_score += rate - 70;
+	else if(rate > 120)
 		scare_score += 50;
 
 	if( gsr_data  < 80)
@@ -48,8 +49,12 @@ int CalcScareScore(void)
 	else if( gsr_data  < 20)
 		scare_score += 25;
 
-	if(Displacement() > 160)
+	int dis = Displacement();
+	if(dis > 160)
 		scare_score += 25;
+	if(dis < 80)
+		scare_score += 25;
+
 	return scare_score;
 
 }

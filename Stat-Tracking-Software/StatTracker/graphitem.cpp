@@ -8,8 +8,8 @@
  * @param type The type of data this graph will display
  * @param color The color of the line in this graph
  */
-GraphItem::GraphItem(FearType type, QColor color)
-    : m_type(type), m_minX(0), m_maxX(0), m_minY(0), m_maxY(0), m_color(color), m_data(0)
+GraphItem::GraphItem(int miny, int maxy, FearType type, QColor color)
+    : m_type(type), m_minX(0), m_maxX(0), m_minY(miny), m_maxY(maxy), m_color(color), m_data(0)
 { }
 
 /**
@@ -59,7 +59,7 @@ void GraphItem::setData(QList<FearDataNode> * newData)
     m_maxX = m_data->back().GetTime();
 
     // Find minimum and maximum Y coordinates
-    unsigned short data = 0;
+    /*unsigned short data = 0;
     m_maxY = 0;
     m_minY = 9999;
     for(int i = 0; i < m_data->count(); ++i)
@@ -71,7 +71,7 @@ void GraphItem::setData(QList<FearDataNode> * newData)
 
         if(m_minY > data)
             m_minY = data;
-    }
+    }*/
 }
 
 /**

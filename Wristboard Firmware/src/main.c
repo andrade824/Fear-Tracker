@@ -22,7 +22,7 @@ int main(void)
 	// Setup any needed hardware
 	SetupUART(UBRR);
 	SetupTimer();
-	SetupAccelerometer(FOURG, EIGHTBITS);
+	SetupAccelerometer(TWOG, EIGHTBITS);
 	InitADC();
 	
 	// Enable global interrupts
@@ -64,7 +64,7 @@ int main(void)
 			UARTTransmit(24);
 			// Send the data
 			UARTTransmit(data.pulse_val);
-			UARTTransmit(data.gsr_val);
+			UARTTransmit(data.gsr_val + 15);
 			UARTTransmit(data.accel_x + 128);
 			UARTTransmit(data.accel_y + 128);
 			UARTTransmit(data.accel_z + 128);
