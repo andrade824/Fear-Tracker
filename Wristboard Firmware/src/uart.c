@@ -19,6 +19,9 @@
 */
 void SetupUART(uint16_t ubrr)
 {
+	// Double the baud rate
+	UCSR0A |= _BV(U2X0);
+	
 	// Set Baud rate
 	UBRR0H = (uint8_t) (ubrr >> 8);	// The 8 highest bits of ubrr
 	UBRR0L = (uint8_t) ubrr;		// The 8 lowest bits of ubrr

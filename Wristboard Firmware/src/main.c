@@ -20,7 +20,7 @@
 int main(void)
 {
 	// Setup any needed hardware
-	SetupUART(UBRR);
+	SetupUART(8);
 	SetupTimer();
 	SetupAccelerometer(TWOG, EIGHTBITS);
 	InitADC();

@@ -1,5 +1,6 @@
 #include "..\inc\UART.h"
 #include "../inc/Accel.h"
+#include "../inc/BPM.h"
 
 volatile struct sensor_data sensor[MAXITEMS];
 
@@ -55,11 +56,13 @@ UARTIntHandler(void)
 				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
 				temp = ROM_UARTCharGetNonBlocking(UART1_BASE);
 
-				if(curr_item == 0)
+				if(curr_item == 0) {
+					CalcBPM();
 					curr_item++;
-				else if(curr_item != 0 && sensor[curr_item].gsr_data >= 10)
+				} else if(curr_item != 0 && sensor[curr_item].gsr_data >= 10) {
+					CalcBPM();
 					curr_item++;
-				else
+				} else
 					sensor[curr_item] = sensor[curr_item - 1];
 
 				//send_flag = true;
@@ -149,9 +152,9 @@ void UART1init(void)
     ROM_GPIOPinConfigure(GPIO_PB0_U1RX);
     ROM_GPIOPinTypeUART(GPIO_PORTB_BASE, GPIO_PIN_0| GPIO_PIN_1);
     //
-    // Configure the UART for 38400, 8-N-1 operation.
+    // Configure the UART for 76800, 8-N-1 operation.
     //
-    ROM_UARTConfigSetExpClk(UART1_BASE, ROM_SysCtlClockGet(), 38400,
+    ROM_UARTConfigSetExpClk(UART1_BASE, ROM_SysCtlClockGet(), 115200,
                             (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                              UART_CONFIG_PAR_NONE));
     // Configure FIFO for 1/2th receive full
@@ -161,7 +164,7 @@ void UART1init(void)
     //UARTClockSourceSet(UART1_BASE, UART_CLOCK_PIOSC);
 
     ROM_IntEnable(INT_UART1);
-    ROM_UARTIntEnable(UART1_BASE, UART_INT_RX | UART_INT_OE);
+    ROM_UARTIntEnable(UART1_BASE, UART_INT_RX);
 
 }
 

@@ -21,7 +21,7 @@ volatile _Bool send_flag;
 	ROM_SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL |
 					 SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
 
-	BPMTimerSetUp();
+	//BPMTimerSetUp();
 	Timer1init();
 	UART0init();
 	UART1init();

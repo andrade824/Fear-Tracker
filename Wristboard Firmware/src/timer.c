@@ -52,10 +52,13 @@ void SetupTimer(void)
 	// Configure timer in Clear Timer on Compare (CTC) Mode, and a divide by 64 prescaler
 	TCCR1B = _BV(WGM12)| _BV(CS11) | _BV(CS10); 
 	
-	// Set cycle count at which to trigger interrupt
-	OCR1A = 125;
+	// Set cycle count at which to trigger interrupt (1ms)
+	//OCR1A = 125;
 	
-	// Enable timer1 interrupt (section 15.11.8)
+	// 2ms interval
+	OCR1A = 62;
+	
+	// Enable timer1 interrupt (section 15.11.8);;p 
 	TIMSK1 = _BV(OCIE1A); 
 }
 

@@ -12,6 +12,7 @@
 
 void BPMTimerSetUp();
 int GetBPM();
+void CalcBPM();
 bool getFlag();
 void clearBPMFlag();
 
